@@ -1,0 +1,158 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- LLO Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="stat-card" style="background: linear-gradient(135deg, #1B5E20, #2E7D32); border:none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:56px; height:56px; background: var(--lp-gold); border-radius:14px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-coins" style="font-size:1.5rem; color: var(--lp-green-dark);"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:.8rem; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:1px;">Llanocoin (LLO)</div>
+                        <div style="font-size:1.5rem; font-weight:700; color:#fff;">Token Llanero</div>
+                    </div>
+                </div>
+                {% if llo_rate %}
+                <div class="text-end">
+                    <div style="font-size:.72rem; color:rgba(255,255,255,.6); text-transform:uppercase;">Tasa actual</div>
+                    <div style="font-size:1.3rem; font-weight:700; color: var(--lp-gold);">
+                        ${{ llo_rate.rate_cop|floatformat:0 }} COP
+                    </div>
+                    <div style="font-size:.72rem; color:rgba(255,255,255,.5);">por 1 LLO</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">LLO en Circulacion</div>
+                    <div class="stat-value">{{ total_llo_circulation|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon green"><i class="fas fa-globe"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Billeteras con LLO</div>
+                    <div class="stat-value">{{ total_wallets_with_llo }}</div>
+                </div>
+                <div class="stat-icon blue"><i class="fas fa-wallet"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total Comprados</div>
+                    <div class="stat-value">{{ total_bought|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon gold"><i class="fas fa-arrow-up"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total Vendidos</div>
+                    <div class="stat-value">{{ total_sold|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-arrow-down"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rewards Card -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="border-left: 4px solid var(--lp-gold);">
+            <div class="stat-label">Total Recompensas Distribuidas</div>
+            <div class="stat-value" style="color: var(--lp-gold-dark);">{{ total_rewards|floatformat:2 }} LLO</div>
+            <div style="font-size:.8rem; color:#9ca3af; margin-top:4px;">
+                <i class="fas fa-gift me-1"></i> Incentivos por uso de la plataforma
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LLO Transactions Table -->
+<div class="lp-card">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-list me-2" style="color: var(--lp-green);"></i>Historial de Transacciones LLO</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Tipo</th>
+                    <th>Cantidad LLO</th>
+                    <th>Monto COP</th>
+                    <th>Tasa</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lt in llo_transactions %}
+                <tr>
+                    <td style="font-size:.85rem; white-space:nowrap;">{{ lt.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div style="font-size:.85rem; font-weight:500;">{{ lt.user.full_name|truncatewords:3 }}</div>
+                        <div style="font-size:.72rem; color:#9ca3af;">{{ lt.user.phone_number }}</div>
+                    </td>
+                    <td>
+                        {% if lt.transaction_type == 'BUY' %}
+                        <span class="badge" style="background: var(--lp-green-50); color: var(--lp-green); font-size:.75rem;">
+                            <i class="fas fa-arrow-up me-1"></i>Compra
+                        </span>
+                        {% elif lt.transaction_type == 'SELL' %}
+                        <span class="badge" style="background: #FEE2E2; color: #991B1B; font-size:.75rem;">
+                            <i class="fas fa-arrow-down me-1"></i>Venta
+                        </span>
+                        {% elif lt.transaction_type == 'REWARD' %}
+                        <span class="badge" style="background: #FFF8E1; color: var(--lp-gold-dark); font-size:.75rem;">
+                            <i class="fas fa-gift me-1"></i>Recompensa
+                        </span>
+                        {% else %}
+                        <span class="badge" style="background: #E3F2FD; color: #1565C0; font-size:.75rem;">
+                            {{ lt.get_transaction_type_display }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ lt.amount_llo|floatformat:4 }}</strong></td>
+                    <td>${{ lt.amount_cop|floatformat:0 }}</td>
+                    <td style="font-size:.85rem; color:#6b7280;">${{ lt.rate|floatformat:0 }}</td>
+                    <td>
+                        <span class="badge-status
+                            {% if lt.status == 'COMPLETED' %}badge-completed
+                            {% elif lt.status == 'PENDING' %}badge-pending
+                            {% else %}badge-failed{% endif %}">
+                            {{ lt.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No hay transacciones de Llanocoin</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

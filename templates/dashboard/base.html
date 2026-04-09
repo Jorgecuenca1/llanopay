@@ -1,0 +1,623 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:"Dashboard" }}{% endblock %} | LlanoPay Admin</title>
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lp-green: #2E7D32;
+            --lp-green-dark: #1B5E20;
+            --lp-green-light: #4CAF50;
+            --lp-green-50: #E8F5E9;
+            --lp-gold: #F9A825;
+            --lp-gold-dark: #F57F17;
+            --lp-gold-light: #FDD835;
+            --lp-sidebar-width: 260px;
+            --lp-topbar-height: 64px;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            overflow-x: hidden;
+        }
+
+        /* ---- SIDEBAR ---- */
+        .lp-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--lp-sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, var(--lp-green-dark) 0%, var(--lp-green) 100%);
+            z-index: 1040;
+            overflow-y: auto;
+            transition: transform .3s ease;
+        }
+
+        .lp-sidebar .sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lp-sidebar .sidebar-brand .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--lp-gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--lp-green-dark);
+            font-weight: 800;
+        }
+
+        .lp-sidebar .sidebar-brand h5 {
+            color: #fff;
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: .5px;
+        }
+
+        .lp-sidebar .sidebar-brand small {
+            color: var(--lp-gold-light);
+            font-size: .7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .lp-sidebar .nav-section {
+            padding: 16px 16px 4px;
+            font-size: .65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,.4);
+        }
+
+        .lp-sidebar .nav-link {
+            color: rgba(255,255,255,.75);
+            padding: 10px 24px;
+            font-size: .875rem;
+            font-weight: 500;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all .2s;
+            margin: 1px 8px;
+            border-radius: 8px;
+        }
+
+        .lp-sidebar .nav-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,.1);
+        }
+
+        .lp-sidebar .nav-link.active {
+            color: #fff;
+            background: rgba(255,255,255,.15);
+            font-weight: 600;
+        }
+
+        .lp-sidebar .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background: var(--lp-gold);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .lp-sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* ---- TOPBAR ---- */
+        .lp-topbar {
+            position: fixed;
+            top: 0;
+            left: var(--lp-sidebar-width);
+            right: 0;
+            height: var(--lp-topbar-height);
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        .lp-topbar .topbar-left h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 1.1rem;
+        }
+
+        .lp-topbar .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .lp-topbar .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lp-topbar .admin-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--lp-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: .85rem;
+        }
+
+        /* ---- MAIN CONTENT ---- */
+        .lp-main {
+            margin-left: var(--lp-sidebar-width);
+            margin-top: var(--lp-topbar-height);
+            padding: 24px;
+            min-height: calc(100vh - var(--lp-topbar-height));
+        }
+
+        /* ---- STAT CARDS ---- */
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-card .stat-icon.green {
+            background: var(--lp-green-50);
+            color: var(--lp-green);
+        }
+
+        .stat-card .stat-icon.gold {
+            background: #FFF8E1;
+            color: var(--lp-gold-dark);
+        }
+
+        .stat-card .stat-icon.blue {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .stat-card .stat-icon.purple {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 8px 0 2px;
+        }
+
+        .stat-card .stat-label {
+            font-size: .8rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* ---- CARDS ---- */
+        .lp-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .lp-card .card-header-custom {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lp-card .card-header-custom h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .lp-card .card-body-custom {
+            padding: 20px;
+        }
+
+        /* ---- TABLE ---- */
+        .lp-table {
+            margin: 0;
+        }
+
+        .lp-table thead th {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #6b7280;
+            padding: 12px 16px;
+            white-space: nowrap;
+        }
+
+        .lp-table tbody td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            font-size: .875rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .lp-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* ---- BADGES ---- */
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .badge-completed { background: #DCFCE7; color: #166534; }
+        .badge-pending { background: #FEF3C7; color: #92400E; }
+        .badge-failed { background: #FEE2E2; color: #991B1B; }
+        .badge-active { background: #DBEAFE; color: #1E40AF; }
+        .badge-reversed { background: #F3E8FF; color: #6B21A8; }
+
+        .badge-verified {
+            background: var(--lp-green-50);
+            color: var(--lp-green);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .badge-merchant {
+            background: #FFF8E1;
+            color: var(--lp-gold-dark);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        /* ---- BUTTONS ---- */
+        .btn-lp-primary {
+            background: var(--lp-green);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: .875rem;
+        }
+
+        .btn-lp-primary:hover {
+            background: var(--lp-green-dark);
+            color: #fff;
+        }
+
+        .btn-lp-gold {
+            background: var(--lp-gold);
+            color: #1a1a2e;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: .875rem;
+        }
+
+        .btn-lp-gold:hover {
+            background: var(--lp-gold-dark);
+            color: #fff;
+        }
+
+        .btn-lp-outline {
+            border: 1.5px solid var(--lp-green);
+            color: var(--lp-green);
+            background: transparent;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: .875rem;
+        }
+
+        .btn-lp-outline:hover {
+            background: var(--lp-green);
+            color: #fff;
+        }
+
+        /* ---- FILTER BAR ---- */
+        .filter-bar {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar .form-control,
+        .filter-bar .form-select {
+            border-radius: 8px;
+            border: 1.5px solid #e5e7eb;
+            font-size: .875rem;
+            padding: 8px 12px;
+        }
+
+        .filter-bar .form-control:focus,
+        .filter-bar .form-select:focus {
+            border-color: var(--lp-green);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, .15);
+        }
+
+        /* ---- PAGINATION ---- */
+        .lp-pagination .page-link {
+            color: var(--lp-green);
+            border-radius: 8px;
+            margin: 0 2px;
+            border: 1px solid #e5e7eb;
+            font-size: .85rem;
+        }
+
+        .lp-pagination .page-item.active .page-link {
+            background: var(--lp-green);
+            border-color: var(--lp-green);
+            color: #fff;
+        }
+
+        /* ---- FOOTER ---- */
+        .lp-footer {
+            margin-left: var(--lp-sidebar-width);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: .8rem;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+        }
+
+        /* ---- MOBILE TOGGLE ---- */
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #1a1a2e;
+            cursor: pointer;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 991.98px) {
+            .lp-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .lp-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .lp-topbar {
+                left: 0;
+            }
+
+            .lp-main {
+                margin-left: 0;
+            }
+
+            .lp-footer {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,.5);
+                z-index: 1035;
+                display: none;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+
+        /* ---- SCROLLBAR ---- */
+        .lp-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .lp-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,.2);
+            border-radius: 4px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="lp-sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">LP</div>
+            <div>
+                <h5>LlanoPay</h5>
+                <small>Panel Administracion</small>
+            </div>
+        </div>
+
+        <nav class="mt-2">
+            <div class="nav-section">Principal</div>
+            <a class="nav-link {% if page_title == 'Dashboard' %}active{% endif %}" href="{% url 'dashboard:index' %}">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+
+            <div class="nav-section mt-3">Gestion</div>
+            <a class="nav-link {% if page_title == 'Usuarios' %}active{% endif %}" href="{% url 'dashboard:users' %}">
+                <i class="fas fa-users"></i> Usuarios
+            </a>
+            <a class="nav-link {% if page_title == 'Billeteras' %}active{% endif %}" href="{% url 'dashboard:wallets' %}">
+                <i class="fas fa-wallet"></i> Billeteras
+            </a>
+            <a class="nav-link {% if page_title == 'Transacciones' %}active{% endif %}" href="{% url 'dashboard:transactions' %}">
+                <i class="fas fa-exchange-alt"></i> Transacciones
+            </a>
+            <a class="nav-link {% if page_title == 'Transferencias' %}active{% endif %}" href="{% url 'dashboard:transfers' %}">
+                <i class="fas fa-paper-plane"></i> Transferencias
+            </a>
+
+            <div class="nav-section mt-3">Finanzas</div>
+            <a class="nav-link {% if page_title == 'Crypto & Llanocoin' %}active{% endif %}" href="{% url 'dashboard:crypto' %}">
+                <i class="fab fa-bitcoin"></i> Crypto / Llanocoin
+            </a>
+            <a class="nav-link {% if page_title == 'Marketplace' %}active{% endif %}" href="{% url 'dashboard:merchants' %}">
+                <i class="fas fa-store"></i> Marketplace
+            </a>
+            <a class="nav-link {% if page_title == 'Microcreditos' %}active{% endif %}" href="{% url 'dashboard:microcredits' %}">
+                <i class="fas fa-hand-holding-usd"></i> Microcreditos
+            </a>
+
+            <div class="nav-section mt-3">Sistema</div>
+            <a class="nav-link {% if page_title == 'Notificaciones' %}active{% endif %}" href="{% url 'dashboard:notifications' %}">
+                <i class="fas fa-bell"></i> Notificaciones
+            </a>
+            <a class="nav-link {% if page_title == 'Reportes' %}active{% endif %}" href="{% url 'dashboard:reports' %}">
+                <i class="fas fa-file-alt"></i> Reportes
+            </a>
+        </nav>
+
+        <!-- Llanera Cultural Footer -->
+        <div style="padding: 20px 24px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.1);">
+            <div style="display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,.5); font-size: .75rem;">
+                <i class="fas fa-horse" style="color: var(--lp-gold); font-size: 1.1rem;"></i>
+                <div>
+                    <div style="color: rgba(255,255,255,.7); font-weight: 500;">Llanos Orientales</div>
+                    <div>Finanzas con identidad</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Topbar -->
+    <header class="lp-topbar">
+        <div class="topbar-left d-flex align-items-center gap-3">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h5>{{ page_title|default:"Dashboard" }}</h5>
+        </div>
+        <div class="topbar-right">
+            <span class="text-muted" style="font-size:.85rem;">
+                <i class="fas fa-map-marker-alt me-1" style="color: var(--lp-gold);"></i>
+                Colombia
+            </span>
+            <div class="admin-info">
+                <div class="admin-avatar">
+                    {{ request.user.first_name|first|upper|default:"A" }}
+                </div>
+                <div class="d-none d-md-block">
+                    <div style="font-size:.85rem; font-weight:600; color:#1a1a2e;">{{ request.user.full_name|default:"Admin" }}</div>
+                    <div style="font-size:.72rem; color:#9ca3af;">Administrador</div>
+                </div>
+            </div>
+            <a href="{% url 'dashboard:logout' %}" class="btn btn-sm btn-outline-danger" title="Cerrar sesion">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="lp-main">
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="lp-footer">
+        LlanoPay &copy; 2024-2026 &mdash; Billetera digital de los Llanos Orientales de Colombia.
+        Construido con orgullo llanero.
+    </footer>
+
+    <!-- Bootstrap 5.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

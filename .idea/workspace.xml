@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="48383678-7d8a-432b-be05-f32bb63a535a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../.idea/PycharmProjects.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SIFEE/.idea/SIFEE.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../TrabajoMaestria/.idea/TrabajoMaestria.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../TrabajoMaestria/Gdp_Cuenca_Jorge_V2 - John John.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../accesowifi/.idea/accesowifi.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../analisisE14/.idea/analisisE14.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../analisisE24E26/.idea/analisisE24E26.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../analisisregistraduria/.idea/analisisregistraduria.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../andrescomoes/andrescomoes/.idea/andrescomoes.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../andrescomoes/andrespadondees/.idea/andrespadondees.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../auditoriamedica/.idea/auditoriamedica.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio-/.idea/binkio-.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/.idea/binkio.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/.idea/binkio.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/binkio-orquestador.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../codebit/.idea/codebit.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../constructora/.idea/constructora.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cuentadecobro/.idea/cuentadecobro.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cuentasmedicas/.idea/cuentasmedicas.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../dreams_agency/.idea/dreams_agency.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../educart/.idea/educart.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../exoticamaria/.idea/exoticamaria.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../generador_rips/.idea/generador_rips.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../interventoriadeobras/.idea/interventoriadeobras.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../kitturistico/.idea/kitturistico.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/llanopay.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../maquinadeturing/.idea/maquinadeturing.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../millonario/.idea/millonario.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/misfantasias.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../mivoto/.idea/mivoto.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../obtenerlugar/.idea/obtenerlugar.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../planillas/.idea/planillas.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../procesarvideo/.idea/procesarvideo.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/pruebadehackeo.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../pruebawhatsapp/.idea/pruebawhatsapp.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../reconoce-dispara/.idea/reconoce-dispara.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../recordarapp/.idea/recordarapp.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../secopaso/.idea/secopaso.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../stockmarket/.idea/stockmarket.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../trabajosena/.idea/trabajosena.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../trasladosyadiciones/.idea/trasladosyadiciones.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../vacunacion/.idea/vacunacion.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../vid/.idea/vid.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../vid2text/.idea/vid2text.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../webdigitalmodel/.idea/webdigitalmodel.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ControlElectoral/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ControlElectoral/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../habilitacion/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/../habilitacion/.claude/settings.local.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="3AX9RK7Wz3Vm8DhaCKbVR935USL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/HOME/PycharmProjects/llanopay&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\HOME\PycharmProjects\llanopay" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="48383678-7d8a-432b-be05-f32bb63a535a" name="Changes" comment="" />
+      <created>1772728038831</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1772728038831</updated>
+    </task>
+    <servers />
+  </component>
+</project>

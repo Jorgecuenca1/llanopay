@@ -1,0 +1,178 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Send Notification Form -->
+<div class="lp-card mb-4">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-paper-plane me-2" style="color: var(--lp-gold);"></i>Enviar Notificacion Masiva</h6>
+    </div>
+    <div class="card-body-custom">
+        <form method="post" action="#">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size:.85rem; font-weight:600;">Tipo de notificacion</label>
+                    <select class="form-select" name="notification_type" style="border-radius:8px;">
+                        {% for value, label in type_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size:.85rem; font-weight:600;">Canal</label>
+                    <select class="form-select" name="channel" style="border-radius:8px;">
+                        {% for value, label in channel_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size:.85rem; font-weight:600;">Titulo</label>
+                    <input type="text" class="form-control" name="title" placeholder="Titulo de la notificacion" style="border-radius:8px;">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" style="font-size:.85rem; font-weight:600;">Mensaje</label>
+                    <textarea class="form-control" name="message" rows="3" placeholder="Escriba el mensaje de la notificacion..." style="border-radius:8px;"></textarea>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="button" class="btn btn-lp-primary" disabled>
+                        <i class="fas fa-broadcast-tower me-1"></i> Enviar a todos los usuarios
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+    <form method="get" action="{% url 'dashboard:notifications' %}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Tipo</label>
+                <select class="form-select" name="type">
+                    <option value="">Todos</option>
+                    {% for value, label in type_choices %}
+                    <option value="{{ value }}" {% if ntype == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Canal</label>
+                <select class="form-select" name="channel">
+                    <option value="">Todos</option>
+                    {% for value, label in channel_choices %}
+                    <option value="{{ value }}" {% if channel == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-lp-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col text-end">
+                <span class="text-muted" style="font-size:.85rem;">
+                    <strong>{{ total }}</strong> notificaciones
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Notifications Table -->
+<div class="lp-card">
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Tipo</th>
+                    <th>Titulo</th>
+                    <th>Canal</th>
+                    <th>Enviada</th>
+                    <th>Leida</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notifications %}
+                <tr>
+                    <td style="font-size:.85rem; white-space:nowrap;">{{ n.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div style="font-size:.85rem; font-weight:500;">{{ n.user.full_name|truncatewords:3 }}</div>
+                        <div style="font-size:.72rem; color:#9ca3af;">{{ n.user.phone_number }}</div>
+                    </td>
+                    <td style="font-size:.85rem;">{{ n.get_notification_type_display }}</td>
+                    <td style="font-size:.85rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        {{ n.title }}
+                    </td>
+                    <td>
+                        {% if n.channel == 'PUSH' %}
+                        <span class="badge" style="background:#E3F2FD; color:#1565C0; font-size:.72rem;">
+                            <i class="fas fa-mobile-alt me-1"></i>Push
+                        </span>
+                        {% elif n.channel == 'SMS' %}
+                        <span class="badge" style="background:#FFF8E1; color: var(--lp-gold-dark); font-size:.72rem;">
+                            <i class="fas fa-sms me-1"></i>SMS
+                        </span>
+                        {% elif n.channel == 'WEBSOCKET' %}
+                        <span class="badge" style="background:#F3E5F5; color:#7B1FA2; font-size:.72rem;">
+                            <i class="fas fa-plug me-1"></i>WebSocket
+                        </span>
+                        {% elif n.channel == 'EMAIL' %}
+                        <span class="badge" style="background: var(--lp-green-50); color: var(--lp-green); font-size:.72rem;">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if n.is_sent %}
+                        <i class="fas fa-check-circle" style="color: var(--lp-green);"></i>
+                        {% else %}
+                        <i class="fas fa-clock" style="color: var(--lp-gold);"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if n.is_read %}
+                        <i class="fas fa-check-double" style="color: var(--lp-green);"></i>
+                        {% else %}
+                        <i class="fas fa-minus" style="color:#d1d5db;"></i>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No se encontraron notificaciones</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center py-3">
+        <nav>
+            <ul class="pagination lp-pagination mb-0">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"-1" }}&type={{ ntype }}&channel={{ channel }}">&laquo;</a>
+                </li>
+                {% endif %}
+                {% for p in page_range %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}&type={{ ntype }}&channel={{ channel }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"1" }}&type={{ ntype }}&channel={{ channel }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

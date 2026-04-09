@@ -1,0 +1,151 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Master Wallet Card -->
+{% if master_wallet %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="stat-card" style="background: linear-gradient(135deg, var(--lp-green-dark), var(--lp-green)); border:none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <div style="font-size:.8rem; color: rgba(255,255,255,.7); font-weight:500; text-transform:uppercase; letter-spacing:1px;">
+                        <i class="fas fa-shield-alt me-1"></i> Billetera Maestra
+                    </div>
+                    <div style="font-size:.85rem; color: rgba(255,255,255,.6); margin-top:4px;">
+                        Reservas globales del sistema
+                    </div>
+                </div>
+                <div class="d-flex gap-4 flex-wrap">
+                    <div class="text-center">
+                        <div style="font-size:.7rem; color: rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:1px;">COP</div>
+                        <div style="font-size:1.4rem; font-weight:700; color:#fff;">${{ master_wallet.balance_cop|floatformat:0 }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div style="font-size:.7rem; color: rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:1px;">LLO</div>
+                        <div style="font-size:1.4rem; font-weight:700; color: var(--lp-gold);">{{ master_wallet.balance_llo|floatformat:2 }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div style="font-size:.7rem; color: rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:1px;">Crypto USD</div>
+                        <div style="font-size:1.4rem; font-weight:700; color:#fff;">${{ master_wallet.total_crypto_reserves_usd|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total Billeteras</div>
+                    <div class="stat-value">{{ total_wallets }}</div>
+                </div>
+                <div class="stat-icon green"><i class="fas fa-wallet"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total COP en billeteras</div>
+                    <div class="stat-value">${{ total_cop|floatformat:0 }}</div>
+                </div>
+                <div class="stat-icon gold"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total LLO en billeteras</div>
+                    <div class="stat-value">{{ total_llo|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-coins"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wallets Table -->
+<div class="lp-card">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-wallet me-2" style="color: var(--lp-green);"></i>Todas las Billeteras</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Telefono</th>
+                    <th>Saldo COP</th>
+                    <th>Saldo LLO</th>
+                    <th>Estado</th>
+                    <th>Creada</th>
+                    <th>Actualizada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wallet in wallets %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:32px; height:32px; border-radius:50%; background: var(--lp-green-50); color: var(--lp-green); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:.75rem;">
+                                {{ wallet.user.first_name|first|upper }}
+                            </div>
+                            <span>{{ wallet.user.full_name }}</span>
+                        </div>
+                    </td>
+                    <td style="color: var(--lp-green); font-weight:500;">{{ wallet.user.phone_number }}</td>
+                    <td><strong>${{ wallet.balance_cop|floatformat:0 }}</strong></td>
+                    <td><strong style="color: var(--lp-gold-dark);">{{ wallet.balance_llo|floatformat:2 }} LLO</strong></td>
+                    <td>
+                        {% if wallet.is_active %}
+                        <span class="badge-status badge-completed">Activa</span>
+                        {% else %}
+                        <span class="badge-status badge-failed">Inactiva</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.85rem; color:#6b7280;">{{ wallet.created_at|date:"d/m/Y" }}</td>
+                    <td style="font-size:.85rem; color:#6b7280;">{{ wallet.updated_at|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No hay billeteras registradas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center py-3">
+        <nav>
+            <ul class="pagination lp-pagination mb-0">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"-1" }}">&laquo;</a>
+                </li>
+                {% endif %}
+                {% for p in page_range %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"1" }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

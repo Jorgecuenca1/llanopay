@@ -1,0 +1,211 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Prestamos Activos</div>
+                    <div class="stat-value">{{ active_loans }}</div>
+                </div>
+                <div class="stat-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total Desembolsado</div>
+                    <div class="stat-value">${{ total_disbursed|floatformat:0 }}</div>
+                </div>
+                <div class="stat-icon gold"><i class="fas fa-money-bill-wave"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total Recaudado</div>
+                    <div class="stat-value">${{ total_repaid|floatformat:0 }}</div>
+                </div>
+                <div class="stat-icon blue"><i class="fas fa-coins"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Tasa de Mora</div>
+                    <div class="stat-value">{{ default_rate }}%</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Status Distribution Chart -->
+    <div class="col-lg-4">
+        <div class="lp-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-chart-pie me-2" style="color: var(--lp-gold);"></i>Distribucion por Estado</h6>
+            </div>
+            <div class="card-body-custom">
+                <canvas id="mcStatusChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Microcredits Table -->
+    <div class="col-lg-8">
+        <!-- Filter -->
+        <div class="filter-bar">
+            <form method="get" action="{% url 'dashboard:microcredits' %}">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Estado</label>
+                        <select class="form-select" name="status">
+                            <option value="">Todos</option>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-lp-primary w-100">
+                            <i class="fas fa-filter me-1"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="lp-card">
+            <div class="table-responsive">
+                <table class="table lp-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Producto</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Vencimiento</th>
+                            <th>Pagado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mc in microcredits %}
+                        <tr>
+                            <td>
+                                <div style="font-size:.85rem; font-weight:500;">{{ mc.user.full_name|truncatewords:3 }}</div>
+                                <div style="font-size:.72rem; color:#9ca3af;">{{ mc.user.phone_number }}</div>
+                            </td>
+                            <td style="font-size:.85rem;">{{ mc.product.name }}</td>
+                            <td>
+                                <strong>${{ mc.amount_approved|default:mc.amount_requested|floatformat:0 }}</strong>
+                                <div style="font-size:.72rem; color:#9ca3af;">Total: ${{ mc.total_to_repay|floatformat:0 }}</div>
+                            </td>
+                            <td>
+                                <span class="badge-status
+                                    {% if mc.status == 'PAID' %}badge-completed
+                                    {% elif mc.status == 'ACTIVE' or mc.status == 'DISBURSED' %}badge-active
+                                    {% elif mc.status == 'REQUESTED' or mc.status == 'APPROVED' %}badge-pending
+                                    {% elif mc.status == 'DEFAULTED' %}badge-failed
+                                    {% else %}badge-reversed{% endif %}">
+                                    {{ mc.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="font-size:.85rem; color:#6b7280;">
+                                {% if mc.due_date %}
+                                {{ mc.due_date|date:"d/m/Y" }}
+                                {% else %}
+                                --
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="font-size:.85rem;">${{ mc.amount_repaid|floatformat:0 }}</div>
+                                {% if mc.total_to_repay > 0 %}
+                                {% widthratio mc.amount_repaid mc.total_to_repay 100 as repaid_pct %}
+                                <div class="progress mt-1" style="height:4px; width:80px;">
+                                    <div class="progress-bar" style="width:{{ repaid_pct }}%; background: var(--lp-green);"></div>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No se encontraron microcreditos</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="d-flex justify-content-center py-3">
+                <nav>
+                    <ul class="pagination lp-pagination mb-0">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page|add:"-1" }}&status={{ status_filter }}">&laquo;</a>
+                        </li>
+                        {% endif %}
+                        {% for p in page_range %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}&status={{ status_filter }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                        {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page|add:"1" }}&status={{ status_filter }}">&raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const mcCtx = document.getElementById('mcStatusChart').getContext('2d');
+    const mcColors = ['#2E7D32', '#F9A825', '#1565C0', '#7B1FA2', '#EF6C00', '#C62828', '#00838F'];
+    new Chart(mcCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ mc_pie_labels|safe }},
+            datasets: [{
+                data: {{ mc_pie_data|safe }},
+                backgroundColor: mcColors.slice(0, {{ mc_pie_data|length }}),
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 11 },
+                        padding: 10,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                    }
+                }
+            },
+            cutout: '55%',
+        }
+    });
+</script>
+{% endblock %}

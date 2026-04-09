@@ -1,0 +1,143 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" action="{% url 'dashboard:transactions' %}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Tipo</label>
+                <select class="form-select" name="type">
+                    <option value="">Todos</option>
+                    {% for value, label in transaction_types %}
+                    <option value="{{ value }}" {% if tx_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Estado</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Moneda</label>
+                <select class="form-select" name="currency">
+                    <option value="">Todas</option>
+                    {% for value, label in currency_choices %}
+                    <option value="{{ value }}" {% if currency == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Desde</label>
+                <input type="date" class="form-control" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Hasta</label>
+                <input type="date" class="form-control" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-lp-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+        </div>
+        <div class="mt-2 text-end">
+            <span class="text-muted" style="font-size:.85rem;">
+                <strong>{{ total }}</strong> transacciones encontradas
+            </span>
+            <button type="button" class="btn btn-sm btn-lp-gold ms-2" disabled>
+                <i class="fas fa-download me-1"></i> Exportar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="lp-card">
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Moneda</th>
+                    <th>Estado</th>
+                    <th>Referencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td style="font-size:.85rem; white-space:nowrap;">{{ tx.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div style="font-size:.85rem; font-weight:500;">{{ tx.wallet.user.full_name|truncatewords:3 }}</div>
+                        <div style="font-size:.75rem; color:#9ca3af;">{{ tx.wallet.user.phone_number }}</div>
+                    </td>
+                    <td>
+                        <span style="font-size:.85rem;">{{ tx.get_transaction_type_display }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ tx.amount|floatformat:2 }}</strong>
+                    </td>
+                    <td>
+                        {% if tx.currency == 'COP' %}
+                        <span class="badge" style="background: var(--lp-green-50); color: var(--lp-green); font-size:.75rem;">COP</span>
+                        {% else %}
+                        <span class="badge" style="background: #FFF8E1; color: var(--lp-gold-dark); font-size:.75rem;">LLO</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge-status
+                            {% if tx.status == 'COMPLETED' %}badge-completed
+                            {% elif tx.status == 'PENDING' %}badge-pending
+                            {% elif tx.status == 'FAILED' %}badge-failed
+                            {% else %}badge-reversed{% endif %}">
+                            {{ tx.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="font-size:.75rem; color:#9ca3af; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        {{ tx.reference|default:"-" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No se encontraron transacciones</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center py-3">
+        <nav>
+            <ul class="pagination lp-pagination mb-0">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"-1" }}&type={{ tx_type }}&status={{ status }}&currency={{ currency }}&date_from={{ date_from }}&date_to={{ date_to }}">&laquo;</a>
+                </li>
+                {% endif %}
+                {% for p in page_range %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}&type={{ tx_type }}&status={{ status }}&currency={{ currency }}&date_from={{ date_from }}&date_to={{ date_to }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"1" }}&type={{ tx_type }}&status={{ status }}&currency={{ currency }}&date_from={{ date_from }}&date_to={{ date_to }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

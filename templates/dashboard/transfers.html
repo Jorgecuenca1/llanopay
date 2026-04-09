@@ -1,0 +1,151 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Transferencias Hoy</div>
+                    <div class="stat-value">{{ today_count }}</div>
+                </div>
+                <div class="stat-icon green"><i class="fas fa-paper-plane"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Volumen Hoy</div>
+                    <div class="stat-value">${{ today_volume|floatformat:0 }}</div>
+                </div>
+                <div class="stat-icon gold"><i class="fas fa-chart-line"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Comisiones Hoy</div>
+                    <div class="stat-value">${{ today_commissions|floatformat:0 }}</div>
+                </div>
+                <div class="stat-icon blue"><i class="fas fa-percentage"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter -->
+<div class="filter-bar">
+    <form method="get" action="{% url 'dashboard:transfers' %}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Estado</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-lp-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col text-end">
+                <span class="text-muted" style="font-size:.85rem;">
+                    <strong>{{ total }}</strong> transferencias
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Transfers Table -->
+<div class="lp-card">
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Remitente</th>
+                    <th>Destinatario</th>
+                    <th>Monto</th>
+                    <th>Moneda</th>
+                    <th>Comision</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transfers %}
+                <tr>
+                    <td style="font-size:.85rem; white-space:nowrap;">{{ t.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div style="font-size:.85rem; font-weight:500;">{{ t.sender.full_name|truncatewords:3 }}</div>
+                        <div style="font-size:.75rem; color:#9ca3af;">{{ t.sender.phone_number }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:.85rem; font-weight:500;">{{ t.receiver.full_name|truncatewords:3 }}</div>
+                        <div style="font-size:.75rem; color:#9ca3af;">{{ t.receiver.phone_number }}</div>
+                    </td>
+                    <td><strong>{{ t.amount|floatformat:2 }}</strong></td>
+                    <td>
+                        {% if t.currency == 'COP' %}
+                        <span class="badge" style="background: var(--lp-green-50); color: var(--lp-green); font-size:.75rem;">COP</span>
+                        {% else %}
+                        <span class="badge" style="background: #FFF8E1; color: var(--lp-gold-dark); font-size:.75rem;">LLO</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.85rem; color:#6b7280;">
+                        ${{ t.commission_amount|floatformat:2 }}
+                        <span style="font-size:.72rem;">({{ t.commission_rate|floatformat:2 }}%)</span>
+                    </td>
+                    <td>
+                        <span class="badge-status
+                            {% if t.status == 'COMPLETED' %}badge-completed
+                            {% elif t.status == 'PENDING' or t.status == 'OTP_REQUIRED' %}badge-pending
+                            {% elif t.status == 'FAILED' %}badge-failed
+                            {% else %}badge-reversed{% endif %}">
+                            {{ t.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No se encontraron transferencias</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center py-3">
+        <nav>
+            <ul class="pagination lp-pagination mb-0">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"-1" }}&status={{ status }}">&laquo;</a>
+                </li>
+                {% endif %}
+                {% for p in page_range %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}&status={{ status }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"1" }}&status={{ status }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

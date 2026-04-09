@@ -1,0 +1,1207 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NovaPay - Billetera Digital</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--np-primary:#1B5E20;--np-primary-light:#2E7D32;--np-primary-50:#E8F5E9;--np-accent:#F9A825;--np-accent-dark:#F57F17;--np-dark:#0f172a;--np-gray:#64748b;--np-light:#f8fafc;--np-border:#e2e8f0;--np-success:#16a34a;--np-danger:#dc2626;--np-warning:#d97706;--np-info:#2563eb;--np-radius:12px;--np-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--np-shadow-lg:0 10px 25px rgba(0,0,0,.1)}
+*{font-family:'Inter',system-ui,sans-serif;margin:0;padding:0;box-sizing:border-box}
+body{background:var(--np-light);color:var(--np-dark);min-height:100vh;overflow-x:hidden}
+.hidden{display:none!important}
+/* Auth Pages */
+.auth-page{min-height:100vh;background:linear-gradient(135deg,#0d3311 0%,#1B5E20 30%,#2E7D32 60%,#1B5E20 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:#fff;border-radius:20px;box-shadow:var(--np-shadow-lg);width:100%;max-width:440px;overflow:hidden}
+.auth-header{background:linear-gradient(135deg,var(--np-primary),var(--np-primary-light));padding:36px 32px 28px;text-align:center}
+.auth-header .brand{width:60px;height:60px;background:var(--np-accent);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;color:var(--np-primary);font-weight:800;margin-bottom:12px}
+.auth-header h3{color:#fff;font-weight:700;margin-bottom:4px}
+.auth-header p{color:rgba(255,255,255,.7);font-size:.85rem}
+.auth-body{padding:32px}
+.auth-body .form-label{font-weight:600;font-size:.85rem;color:#374151}
+.auth-body .form-control{border-radius:10px;border:1.5px solid var(--np-border);padding:11px 14px;font-size:.9rem;transition:all .2s}
+.auth-body .form-control:focus{border-color:var(--np-primary-light);box-shadow:0 0 0 3px rgba(46,125,50,.15)}
+.auth-body .input-icon{position:relative}
+.auth-body .input-icon i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--np-gray);font-size:.9rem}
+.auth-body .input-icon .form-control{padding-left:40px}
+.btn-np{background:var(--np-primary-light);color:#fff;border:none;font-weight:600;border-radius:10px;padding:12px;font-size:.95rem;width:100%;transition:all .2s}
+.btn-np:hover{background:var(--np-primary);color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(27,94,32,.3)}
+.btn-np:disabled{opacity:.6;transform:none}
+.btn-np-outline{background:transparent;color:var(--np-primary-light);border:2px solid var(--np-primary-light);font-weight:600;border-radius:10px;padding:10px;font-size:.9rem;width:100%;transition:all .2s}
+.btn-np-outline:hover{background:var(--np-primary-light);color:#fff}
+.btn-np-gold{background:var(--np-accent);color:var(--np-primary);border:none;font-weight:700;border-radius:10px;padding:12px;font-size:.95rem;transition:all .2s}
+.btn-np-gold:hover{background:var(--np-accent-dark);color:#fff}
+.alert-np{border-radius:10px;font-size:.85rem;border:none;padding:12px 16px}
+.alert-np.error{background:#fef2f2;color:#991b1b}
+.alert-np.success{background:#f0fdf4;color:#166534}
+/* App Shell */
+.app-shell{display:flex;flex-direction:column;min-height:100vh}
+.app-topbar{background:#fff;border-bottom:1px solid var(--np-border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.app-topbar .brand-sm{display:flex;align-items:center;gap:10px}
+.app-topbar .brand-sm .icon{width:36px;height:36px;background:var(--np-accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--np-primary);font-weight:800}
+.app-topbar .brand-sm span{font-weight:700;font-size:1.1rem;color:var(--np-dark)}
+.app-topbar .topbar-actions{display:flex;align-items:center;gap:12px}
+.app-topbar .topbar-actions .btn-icon{width:40px;height:40px;border-radius:10px;border:1px solid var(--np-border);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--np-gray);cursor:pointer;position:relative;transition:all .2s}
+.app-topbar .topbar-actions .btn-icon:hover{background:var(--np-primary-50);color:var(--np-primary-light)}
+.app-topbar .topbar-actions .btn-icon .badge-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--np-danger);border-radius:50%;border:2px solid #fff}
+.app-content{flex:1;padding:0 0 80px}
+/* Bottom Nav */
+.app-bottomnav{position:fixed;bottom:0;left:0;right:0;height:64px;background:#fff;border-top:1px solid var(--np-border);display:flex;align-items:center;justify-content:space-around;z-index:100;padding:0 8px;box-shadow:0 -2px 10px rgba(0,0,0,.05)}
+.app-bottomnav .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;border-radius:12px;cursor:pointer;transition:all .2s;min-width:60px;text-decoration:none;color:var(--np-gray)}
+.app-bottomnav .nav-item.active{color:var(--np-primary-light)}
+.app-bottomnav .nav-item.active i{background:var(--np-primary-50);padding:4px 16px;border-radius:20px;color:var(--np-primary-light)}
+.app-bottomnav .nav-item i{font-size:1.15rem;transition:all .2s}
+.app-bottomnav .nav-item span{font-size:.65rem;font-weight:600}
+/* Page styles */
+.page-section{padding:20px}
+.page-header{padding:20px 20px 0;margin-bottom:4px}
+.page-header h4{font-weight:700;font-size:1.25rem;color:var(--np-dark)}
+.page-header p{color:var(--np-gray);font-size:.85rem;margin-top:2px}
+/* Balance Card */
+.balance-hero{background:linear-gradient(135deg,#1a6b21 0%,#2E7D32 40%,#388E3C 100%);border-radius:var(--np-radius);padding:24px;color:#fff;margin:16px 20px;position:relative;overflow:hidden}
+.balance-hero::after{content:'';position:absolute;top:-50%;right:-30%;width:60%;height:150%;background:radial-gradient(ellipse,rgba(249,168,37,.15),transparent 70%);pointer-events:none}
+.balance-hero .balance-label{font-size:.8rem;opacity:.8;font-weight:500}
+.balance-hero .balance-value{font-size:2rem;font-weight:800;margin:4px 0}
+.balance-hero .balance-sub{font-size:.85rem;opacity:.7}
+.balance-hero .balance-actions{display:flex;gap:12px;margin-top:16px}
+.balance-hero .balance-actions .ba-btn{flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:10px;text-align:center;color:#fff;cursor:pointer;transition:all .2s;text-decoration:none;font-size:.8rem;font-weight:600}
+.balance-hero .balance-actions .ba-btn:hover{background:rgba(255,255,255,.25)}
+.balance-hero .balance-actions .ba-btn i{display:block;font-size:1.1rem;margin-bottom:4px}
+/* Quick Actions */
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 20px;margin:20px 0}
+.quick-item{background:#fff;border-radius:var(--np-radius);border:1px solid var(--np-border);padding:16px 8px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--np-dark)}
+.quick-item:hover{transform:translateY(-2px);box-shadow:var(--np-shadow-lg);color:var(--np-dark)}
+.quick-item .qi-icon{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:8px}
+.quick-item .qi-icon.green{background:var(--np-primary-50);color:var(--np-primary-light)}
+.quick-item .qi-icon.gold{background:#fff8e1;color:var(--np-accent-dark)}
+.quick-item .qi-icon.blue{background:#eff6ff;color:var(--np-info)}
+.quick-item .qi-icon.purple{background:#f5f3ff;color:#7c3aed}
+.quick-item .qi-label{font-size:.72rem;font-weight:600;color:var(--np-gray)}
+/* Cards */
+.np-card{background:#fff;border-radius:var(--np-radius);border:1px solid var(--np-border);margin:0 20px 16px;overflow:hidden}
+.np-card .card-head{padding:16px 20px;border-bottom:1px solid var(--np-border);display:flex;align-items:center;justify-content:space-between}
+.np-card .card-head h6{margin:0;font-weight:700;font-size:.95rem}
+.np-card .card-head a{font-size:.8rem;color:var(--np-primary-light);text-decoration:none;font-weight:600}
+.np-card .card-inner{padding:16px 20px}
+/* Transaction Items */
+.tx-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9}
+.tx-item:last-child{border:none}
+.tx-item .tx-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.tx-item .tx-icon.in{background:#f0fdf4;color:var(--np-success)}
+.tx-item .tx-icon.out{background:#fef2f2;color:var(--np-danger)}
+.tx-item .tx-icon.crypto{background:#fff8e1;color:var(--np-accent-dark)}
+.tx-item .tx-icon.loan{background:#eff6ff;color:var(--np-info)}
+.tx-item .tx-info{flex:1;min-width:0}
+.tx-item .tx-info .tx-title{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-item .tx-info .tx-date{font-size:.72rem;color:var(--np-gray)}
+.tx-item .tx-amount{text-align:right;font-weight:700;font-size:.9rem;white-space:nowrap}
+.tx-item .tx-amount.positive{color:var(--np-success)}
+.tx-item .tx-amount.negative{color:var(--np-danger)}
+/* Merchant Card */
+.merchant-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:all .15s}
+.merchant-item:last-child{border:none}
+.merchant-item:hover{background:#f8fafc;margin:0 -20px;padding:14px 20px}
+.merchant-item .m-avatar{width:48px;height:48px;border-radius:12px;background:var(--np-primary-50);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--np-primary-light);flex-shrink:0}
+.merchant-item .m-info{flex:1;min-width:0}
+.merchant-item .m-info .m-name{font-weight:600;font-size:.9rem}
+.merchant-item .m-info .m-cat{font-size:.75rem;color:var(--np-gray)}
+.merchant-item .m-rating{color:var(--np-accent);font-size:.8rem;font-weight:600}
+/* Score Gauge */
+.score-gauge{width:180px;height:180px;margin:0 auto;position:relative}
+.score-gauge .score-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-gauge .score-val .num{font-size:2.5rem;font-weight:800;color:var(--np-primary-light)}
+.score-gauge .score-val .label{font-size:.75rem;color:var(--np-gray);font-weight:600}
+/* Form styles */
+.np-form .form-group{margin-bottom:16px}
+.np-form .form-label{font-weight:600;font-size:.85rem;color:#374151;margin-bottom:6px}
+.np-form .form-control,.np-form .form-select{border-radius:10px;border:1.5px solid var(--np-border);padding:11px 14px;font-size:.9rem}
+.np-form .form-control:focus,.np-form .form-select:focus{border-color:var(--np-primary-light);box-shadow:0 0 0 3px rgba(46,125,50,.15)}
+/* Tabs */
+.np-tabs{display:flex;gap:4px;padding:0 20px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.np-tabs::-webkit-scrollbar{display:none}
+.np-tab{padding:8px 16px;border-radius:20px;font-size:.8rem;font-weight:600;color:var(--np-gray);background:#fff;border:1px solid var(--np-border);cursor:pointer;white-space:nowrap;transition:all .2s}
+.np-tab.active{background:var(--np-primary-light);color:#fff;border-color:var(--np-primary-light)}
+/* Modal */
+.np-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s}
+.np-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;animation:slideUp .3s}
+.np-modal .modal-handle{width:40px;height:4px;background:#d1d5db;border-radius:4px;margin:12px auto}
+.np-modal .modal-head{padding:0 24px 16px;border-bottom:1px solid var(--np-border)}
+.np-modal .modal-head h5{font-weight:700;font-size:1.1rem}
+.np-modal .modal-body-c{padding:24px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+/* Stat mini */
+.stat-mini{display:flex;gap:12px;padding:0 20px;margin:16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stat-mini::-webkit-scrollbar{display:none}
+.stat-mini .sm-item{background:#fff;border:1px solid var(--np-border);border-radius:var(--np-radius);padding:14px 16px;min-width:140px;flex-shrink:0}
+.stat-mini .sm-item .sm-val{font-size:1.2rem;font-weight:700;color:var(--np-dark)}
+.stat-mini .sm-item .sm-label{font-size:.7rem;color:var(--np-gray);font-weight:500;margin-top:2px}
+/* Empty state */
+.empty-state{text-align:center;padding:48px 24px;color:var(--np-gray)}
+.empty-state i{font-size:3rem;margin-bottom:12px;opacity:.3}
+.empty-state p{font-size:.9rem}
+/* Loading */
+.spinner-np{display:inline-block;width:40px;height:40px;border:3px solid var(--np-primary-50);border-top-color:var(--np-primary-light);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-center{display:flex;align-items:center;justify-content:center;padding:60px}
+/* Desktop adjustments */
+@media(min-width:768px){
+.app-content{max-width:600px;margin:0 auto}
+.balance-hero{margin:20px auto;max-width:560px}
+.np-card{max-width:560px;margin-left:auto;margin-right:auto}
+.quick-grid{max-width:560px;margin-left:auto;margin-right:auto}
+.stat-mini{max-width:560px;margin-left:auto;margin-right:auto}
+.np-tabs{max-width:560px;margin-left:auto;margin-right:auto}
+.page-header{max-width:560px;margin-left:auto;margin-right:auto}
+.page-section{max-width:560px;margin-left:auto;margin-right:auto}
+.np-modal{border-radius:20px;margin-bottom:20px}
+}
+/* Profile */
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--np-primary),var(--np-primary-light));display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;margin:0 auto 12px}
+.profile-menu .pm-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:all .15s}
+.profile-menu .pm-item:last-child{border:none}
+.profile-menu .pm-item i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.profile-menu .pm-item .pm-text{flex:1;font-weight:500;font-size:.9rem}
+.profile-menu .pm-item .pm-arrow{color:#d1d5db;font-size:.8rem}
+/* Notification Items */
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #f1f5f9;cursor:pointer}
+.notif-item:last-child{border:none}
+.notif-item.unread{background:#f0fdf4;margin:0 -20px;padding:14px 20px;border-radius:8px}
+.notif-item .ni-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--np-primary-50);color:var(--np-primary-light)}
+.notif-item .ni-content{flex:1;min-width:0}
+.notif-item .ni-content .ni-title{font-weight:600;font-size:.85rem}
+.notif-item .ni-content .ni-msg{font-size:.8rem;color:var(--np-gray);margin-top:2px}
+.notif-item .ni-content .ni-time{font-size:.7rem;color:#94a3b8;margin-top:4px}
+</style>
+</head>
+<body>
+<!-- ==================== AUTH PAGES ==================== -->
+<div id="auth-view" class="auth-page hidden">
+<div class="auth-card">
+<div class="auth-header">
+<div class="brand">NP</div>
+<h3>NovaPay</h3>
+<p id="auth-subtitle">Tu billetera digital</p>
+</div>
+<div class="auth-body">
+<div id="auth-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+<!-- Login Form -->
+<form id="login-form" autocomplete="on">
+<div class="mb-3">
+<label class="form-label">Numero de telefono</label>
+<div class="input-icon"><i class="fas fa-phone"></i>
+<input type="tel" class="form-control" id="login-phone" placeholder="+573001234567" required autocomplete="tel"></div>
+</div>
+<div class="mb-3">
+<label class="form-label">Contrasena</label>
+<div class="input-icon"><i class="fas fa-lock"></i>
+<input type="password" class="form-control" id="login-password" placeholder="Tu contrasena" required autocomplete="current-password"></div>
+</div>
+<button type="submit" class="btn-np mb-3" id="login-btn"><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesion</button>
+<p class="text-center" style="font-size:.85rem;color:var(--np-gray)">No tienes cuenta? <a href="#" onclick="showRegister()" style="color:var(--np-primary-light);font-weight:600">Registrate</a></p>
+</form>
+<!-- Register Form -->
+<form id="register-form" class="hidden" autocomplete="on">
+<div class="mb-3">
+<label class="form-label">Nombre completo</label>
+<div class="row g-2">
+<div class="col-6"><div class="input-icon"><i class="fas fa-user"></i><input type="text" class="form-control" id="reg-fname" placeholder="Nombre" required></div></div>
+<div class="col-6"><input type="text" class="form-control" id="reg-lname" placeholder="Apellido" required style="border-radius:10px;border:1.5px solid var(--np-border);padding:11px 14px;font-size:.9rem"></div>
+</div></div>
+<div class="mb-3">
+<label class="form-label">Telefono</label>
+<div class="input-icon"><i class="fas fa-phone"></i>
+<input type="tel" class="form-control" id="reg-phone" placeholder="+573001234567" required></div>
+</div>
+<div class="mb-3">
+<label class="form-label">Email</label>
+<div class="input-icon"><i class="fas fa-envelope"></i>
+<input type="email" class="form-control" id="reg-email" placeholder="tu@correo.com"></div>
+</div>
+<div class="mb-3">
+<label class="form-label">Documento</label>
+<div class="row g-2">
+<div class="col-5"><select class="form-select" id="reg-doctype" style="border-radius:10px;border:1.5px solid var(--np-border);padding:11px 14px;font-size:.9rem"><option value="CC">CC</option><option value="CE">CE</option><option value="TI">TI</option><option value="NIT">NIT</option><option value="PASAPORTE">Pasaporte</option></select></div>
+<div class="col-7"><input type="text" class="form-control" id="reg-docnum" placeholder="Numero de documento" required style="border-radius:10px;border:1.5px solid var(--np-border);padding:11px 14px;font-size:.9rem"></div>
+</div></div>
+<div class="mb-3">
+<label class="form-label">Contrasena</label>
+<div class="input-icon"><i class="fas fa-lock"></i>
+<input type="password" class="form-control" id="reg-password" placeholder="Min 8 caracteres" required minlength="8"></div>
+</div>
+<button type="submit" class="btn-np mb-3" id="reg-btn"><i class="fas fa-user-plus me-2"></i>Registrarse</button>
+<p class="text-center" style="font-size:.85rem;color:var(--np-gray)">Ya tienes cuenta? <a href="#" onclick="showLogin()" style="color:var(--np-primary-light);font-weight:600">Inicia Sesion</a></p>
+</form>
+<!-- OTP Form -->
+<form id="otp-form" class="hidden">
+<p style="font-size:.9rem;color:var(--np-gray);margin-bottom:20px;text-align:center">Ingresa el codigo de verificacion enviado a tu telefono</p>
+<div class="mb-3">
+<input type="text" class="form-control text-center" id="otp-code" placeholder="000000" maxlength="6" style="font-size:1.5rem;letter-spacing:8px;font-weight:700" required>
+</div>
+<button type="submit" class="btn-np mb-3">Verificar Codigo</button>
+<p class="text-center"><a href="#" onclick="showLogin()" style="font-size:.85rem;color:var(--np-primary-light)">Volver al login</a></p>
+</form>
+</div>
+</div>
+</div>
+
+<!-- ==================== APP SHELL ==================== -->
+<div id="app-view" class="app-shell hidden">
+<!-- Topbar -->
+<header class="app-topbar">
+<div class="brand-sm"><div class="icon">NP</div><span>NovaPay</span></div>
+<div class="topbar-actions">
+<div class="btn-icon" onclick="navigate('notifications')"><i class="fas fa-bell"></i><div class="badge-dot hidden" id="notif-dot"></div></div>
+<div class="btn-icon" onclick="navigate('profile')"><i class="fas fa-user"></i></div>
+</div>
+</header>
+
+<!-- Page Container -->
+<div class="app-content" id="app-content">
+<!-- Pages rendered here dynamically -->
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="app-bottomnav" id="bottomnav">
+<a class="nav-item active" data-page="home" onclick="navigate('home')"><i class="fas fa-home"></i><span>Inicio</span></a>
+<a class="nav-item" data-page="wallet" onclick="navigate('wallet')"><i class="fas fa-wallet"></i><span>Billetera</span></a>
+<a class="nav-item" data-page="transfer" onclick="navigate('transfer')"><i class="fas fa-paper-plane"></i><span>Enviar</span></a>
+<a class="nav-item" data-page="marketplace" onclick="navigate('marketplace')"><i class="fas fa-store"></i><span>Comercios</span></a>
+<a class="nav-item" data-page="more" onclick="navigate('more')"><i class="fas fa-ellipsis-h"></i><span>Mas</span></a>
+</nav>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-container"></div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:300;pointer-events:none" class="hidden">
+<div style="background:var(--np-dark);color:#fff;padding:12px 24px;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:var(--np-shadow-lg)"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+/* =====================================================
+   NovaPay Web Platform - SPA
+   ===================================================== */
+const API_BASE = window.location.origin + '/api/v1';
+let currentUser = null;
+let currentWallet = null;
+let currentPage = 'home';
+
+// ---- Storage ----
+const Storage = {
+  getToken: () => localStorage.getItem('np_access'),
+  getRefresh: () => localStorage.getItem('np_refresh'),
+  setTokens(access, refresh) { localStorage.setItem('np_access', access); if(refresh) localStorage.setItem('np_refresh', refresh); },
+  clear() { localStorage.removeItem('np_access'); localStorage.removeItem('np_refresh'); }
+};
+
+// ---- API Service ----
+const Api = {
+  async request(method, path, data = null, retry = true) {
+    const headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
+    const token = Storage.getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const opts = {method, headers};
+    if (data && method !== 'GET') opts.body = JSON.stringify(data);
+    let url = API_BASE + path;
+    if (data && method === 'GET') {
+      const params = new URLSearchParams(data).toString();
+      if (params) url += '?' + params;
+    }
+    try {
+      const res = await fetch(url, opts);
+      if (res.status === 401 && retry) {
+        const refreshed = await Api.refreshToken();
+        if (refreshed) return Api.request(method, path, data, false);
+        logout(); return {ok: false, status: 401, data: {detail: 'Sesion expirada'}};
+      }
+      const json = await res.json().catch(() => ({}));
+      return {ok: res.ok, status: res.status, data: json};
+    } catch(e) {
+      return {ok: false, status: 0, data: {detail: 'Error de conexion'}};
+    }
+  },
+  async refreshToken() {
+    const refresh = Storage.getRefresh();
+    if (!refresh) return false;
+    try {
+      const res = await fetch(API_BASE + '/auth/token/refresh/', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({refresh})
+      });
+      if (res.ok) {
+        const d = await res.json();
+        Storage.setTokens(d.access, d.refresh || refresh);
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  },
+  get: (p, d) => Api.request('GET', p, d),
+  post: (p, d) => Api.request('POST', p, d),
+  put: (p, d) => Api.request('PUT', p, d),
+  patch: (p, d) => Api.request('PATCH', p, d),
+};
+
+// ---- Auth Functions ----
+function showLogin() {
+  document.getElementById('login-form').classList.remove('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('otp-form').classList.add('hidden');
+  document.getElementById('auth-subtitle').textContent = 'Tu billetera digital';
+  hideAlert();
+}
+function showRegister() {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
+  document.getElementById('otp-form').classList.add('hidden');
+  document.getElementById('auth-subtitle').textContent = 'Crea tu cuenta';
+  hideAlert();
+}
+function showOTP() {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('otp-form').classList.remove('hidden');
+  document.getElementById('auth-subtitle').textContent = 'Verificacion OTP';
+  hideAlert();
+}
+function showAlert(msg, type='error') {
+  const el = document.getElementById('auth-alert');
+  el.className = 'alert-np ' + type;
+  el.innerHTML = '<i class="fas fa-'+(type==='error'?'exclamation-circle':'check-circle')+' me-2"></i>' + msg;
+  el.classList.remove('hidden');
+}
+function hideAlert() { document.getElementById('auth-alert').classList.add('hidden'); }
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Ingresando...';
+  const phone = document.getElementById('login-phone').value.trim();
+  const password = document.getElementById('login-password').value;
+  const res = await Api.post('/auth/login/', {phone_number: phone, password});
+  if (res.ok && res.data.tokens) {
+    Storage.setTokens(res.data.tokens.access, res.data.tokens.refresh);
+    await loadApp();
+  } else {
+    showAlert(res.data.detail || res.data.non_field_errors?.[0] || 'Credenciales incorrectas');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesion';
+});
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
+  const data = {
+    phone_number: document.getElementById('reg-phone').value.trim(),
+    first_name: document.getElementById('reg-fname').value.trim(),
+    last_name: document.getElementById('reg-lname').value.trim(),
+    email: document.getElementById('reg-email').value.trim(),
+    document_type: document.getElementById('reg-doctype').value,
+    document_number: document.getElementById('reg-docnum').value.trim(),
+    password: document.getElementById('reg-password').value
+  };
+  const res = await Api.post('/auth/register/', data);
+  if (res.ok) {
+    window._otpPhone = data.phone_number;
+    window._otpPurpose = 'REGISTER';
+    showOTP();
+    showAlert('Cuenta creada. Verifica tu telefono.', 'success');
+  } else {
+    const errors = Object.values(res.data).flat().join('. ');
+    showAlert(errors || 'Error al registrar');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Registrarse';
+});
+
+document.getElementById('otp-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = document.getElementById('otp-code').value.trim();
+  const res = await Api.post('/auth/verify-otp/', {phone_number: window._otpPhone, code, purpose: window._otpPurpose || 'REGISTER'});
+  if (res.ok && res.data.tokens) {
+    Storage.setTokens(res.data.tokens.access, res.data.tokens.refresh);
+    await loadApp();
+  } else if (res.ok) {
+    showAlert('Codigo verificado. Inicia sesion.', 'success');
+    setTimeout(showLogin, 1500);
+  } else {
+    showAlert(res.data.detail || 'Codigo invalido');
+  }
+});
+
+// ---- Logout ----
+function logout() {
+  Storage.clear();
+  currentUser = null;
+  currentWallet = null;
+  document.getElementById('app-view').classList.add('hidden');
+  document.getElementById('auth-view').classList.remove('hidden');
+  showLogin();
+}
+
+// ---- App Init ----
+async function loadApp() {
+  document.getElementById('auth-view').classList.add('hidden');
+  document.getElementById('app-view').classList.remove('hidden');
+  showLoading();
+  const [profileRes, walletRes] = await Promise.all([Api.get('/auth/profile/'), Api.get('/wallet/balance/')]);
+  if (profileRes.ok) currentUser = profileRes.data;
+  if (walletRes.ok) currentWallet = walletRes.data;
+  navigate('home');
+  checkUnread();
+}
+
+async function checkUnread() {
+  const res = await Api.get('/notifications/unread-count/');
+  if (res.ok && res.data.unread_count > 0) {
+    document.getElementById('notif-dot').classList.remove('hidden');
+  } else {
+    document.getElementById('notif-dot').classList.add('hidden');
+  }
+}
+
+// ---- Navigation ----
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.app-bottomnav .nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page || (page === 'more' && n.dataset.page === 'more'));
+  });
+  const container = document.getElementById('app-content');
+  const pages = {home: renderHome, wallet: renderWallet, transfer: renderTransfer, marketplace: renderMarketplace, more: renderMore, profile: renderProfile, notifications: renderNotifications, crypto: renderCrypto, microcredit: renderMicrocredit, 'transfer-send': renderTransferSend, 'merchant-detail': renderMerchantDetail, 'microcredit-request': renderMicrocreditRequest, transactions: renderTransactions};
+  if (pages[page]) pages[page](container);
+  else renderHome(container);
+  window.scrollTo(0, 0);
+}
+
+function showLoading() {
+  document.getElementById('app-content').innerHTML = '<div class="loading-center"><div class="spinner-np"></div></div>';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.querySelector('div').textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+function fmtCOP(val) {
+  return new Intl.NumberFormat('es-CO', {style:'currency', currency:'COP', minimumFractionDigits:0, maximumFractionDigits:0}).format(val || 0);
+}
+function fmtLLO(val) { return parseFloat(val || 0).toFixed(2) + ' LLO'; }
+function fmtDate(d) { if(!d) return ''; return new Date(d).toLocaleDateString('es-CO', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+// ---- HOME PAGE ----
+function renderHome(c) {
+  const w = currentWallet || {};
+  const u = currentUser || {};
+  c.innerHTML = `
+    <div class="balance-hero">
+      <div class="balance-label">Saldo disponible</div>
+      <div class="balance-value">${fmtCOP(w.balance_cop)}</div>
+      <div class="balance-sub"><i class="fas fa-coins me-1"></i>${fmtLLO(w.balance_llo)} ${w.llo_cop_equivalent ? '('+fmtCOP(w.llo_cop_equivalent)+')' : ''}</div>
+      <div class="balance-actions">
+        <a class="ba-btn" onclick="navigate('transfer-send')"><i class="fas fa-paper-plane"></i>Enviar</a>
+        <a class="ba-btn" onclick="navigate('crypto')"><i class="fas fa-coins"></i>Crypto</a>
+        <a class="ba-btn" onclick="navigate('microcredit')"><i class="fas fa-hand-holding-usd"></i>Credito</a>
+        <a class="ba-btn" onclick="navigate('wallet')"><i class="fas fa-history"></i>Historial</a>
+      </div>
+    </div>
+    <div class="quick-grid">
+      <div class="quick-item" onclick="navigate('transfer-send')"><div class="qi-icon green"><i class="fas fa-paper-plane"></i></div><div class="qi-label">Enviar</div></div>
+      <div class="quick-item" onclick="navigate('crypto')"><div class="qi-icon gold"><i class="fas fa-coins"></i></div><div class="qi-label">Llanocoin</div></div>
+      <div class="quick-item" onclick="navigate('marketplace')"><div class="qi-icon blue"><i class="fas fa-store"></i></div><div class="qi-label">Comercios</div></div>
+      <div class="quick-item" onclick="navigate('microcredit')"><div class="qi-icon purple"><i class="fas fa-hand-holding-usd"></i></div><div class="qi-label">Credito</div></div>
+    </div>
+    <div class="np-card">
+      <div class="card-head"><h6>Actividad reciente</h6><a href="#" onclick="navigate('transactions')">Ver todo</a></div>
+      <div class="card-inner" id="home-recent-tx"><div class="loading-center"><div class="spinner-np"></div></div></div>
+    </div>
+  `;
+  loadRecentTx();
+}
+
+async function loadRecentTx() {
+  const res = await Api.get('/wallet/transactions/', {page_size: 5});
+  const el = document.getElementById('home-recent-tx');
+  if (!el) return;
+  if (res.ok && res.data.results?.length > 0) {
+    el.innerHTML = res.data.results.map(tx => renderTxItem(tx)).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin transacciones recientes</p></div>';
+  }
+}
+
+function renderTxItem(tx) {
+  const isIn = ['DEPOSIT','TRANSFER_IN','CRYPTO_DEPOSIT','LLO_PURCHASE','MICROCREDIT_DISBURSEMENT'].includes(tx.transaction_type);
+  const iconClass = isIn ? 'in' : 'out';
+  const icons = {DEPOSIT:'fa-arrow-down',WITHDRAWAL:'fa-arrow-up',TRANSFER_IN:'fa-arrow-down',TRANSFER_OUT:'fa-arrow-up',CRYPTO_DEPOSIT:'fa-bitcoin',LLO_PURCHASE:'fa-coins',LLO_SALE:'fa-coins',COMMISSION:'fa-percent',MICROCREDIT_DISBURSEMENT:'fa-hand-holding-usd',MICROCREDIT_PAYMENT:'fa-credit-card'};
+  const icon = icons[tx.transaction_type] || 'fa-exchange-alt';
+  const typeNames = {DEPOSIT:'Deposito',WITHDRAWAL:'Retiro',TRANSFER_IN:'Recibido',TRANSFER_OUT:'Enviado',CRYPTO_DEPOSIT:'Deposito Crypto',LLO_PURCHASE:'Compra LLO',LLO_SALE:'Venta LLO',COMMISSION:'Comision',MICROCREDIT_DISBURSEMENT:'Desembolso',MICROCREDIT_PAYMENT:'Pago Credito'};
+  return `<div class="tx-item">
+    <div class="tx-icon ${iconClass}"><i class="fas ${icon}"></i></div>
+    <div class="tx-info"><div class="tx-title">${typeNames[tx.transaction_type]||tx.transaction_type}</div><div class="tx-date">${fmtDate(tx.created_at)}</div></div>
+    <div class="tx-amount ${isIn?'positive':'negative'}">${isIn?'+':'-'}${tx.currency==='LLO'?fmtLLO(tx.amount):fmtCOP(tx.amount)}</div>
+  </div>`;
+}
+
+// ---- WALLET PAGE ----
+async function renderWallet(c) {
+  const w = currentWallet || {};
+  c.innerHTML = `
+    <div class="page-header"><h4>Mi Billetera</h4></div>
+    <div class="stat-mini">
+      <div class="sm-item"><div class="sm-val">${fmtCOP(w.balance_cop)}</div><div class="sm-label">Saldo COP</div></div>
+      <div class="sm-item"><div class="sm-val">${fmtLLO(w.balance_llo)}</div><div class="sm-label">Llanocoin</div></div>
+      <div class="sm-item"><div class="sm-val">${fmtCOP(w.llo_cop_equivalent||0)}</div><div class="sm-label">Equiv. LLO en COP</div></div>
+    </div>
+    <div class="np-tabs" id="wallet-tabs">
+      <div class="np-tab active" data-filter="">Todas</div>
+      <div class="np-tab" data-filter="DEPOSIT">Depositos</div>
+      <div class="np-tab" data-filter="TRANSFER_IN">Recibidas</div>
+      <div class="np-tab" data-filter="TRANSFER_OUT">Enviadas</div>
+      <div class="np-tab" data-filter="LLO_PURCHASE">LLO</div>
+    </div>
+    <div class="np-card"><div class="card-inner" id="wallet-tx-list"><div class="loading-center"><div class="spinner-np"></div></div></div></div>
+  `;
+  loadWalletTx('');
+  document.querySelectorAll('#wallet-tabs .np-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#wallet-tabs .np-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadWalletTx(tab.dataset.filter);
+    });
+  });
+}
+
+async function loadWalletTx(filter) {
+  const params = {page_size: 20};
+  if (filter) params.transaction_type = filter;
+  const res = await Api.get('/wallet/transactions/', params);
+  const el = document.getElementById('wallet-tx-list');
+  if (!el) return;
+  if (res.ok && res.data.results?.length > 0) {
+    el.innerHTML = res.data.results.map(tx => renderTxItem(tx)).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>No hay transacciones</p></div>';
+  }
+}
+
+// ---- TRANSACTIONS PAGE ----
+async function renderTransactions(c) {
+  c.innerHTML = `<div class="page-header"><h4>Historial Completo</h4></div>
+    <div class="np-card"><div class="card-inner" id="all-tx-list"><div class="loading-center"><div class="spinner-np"></div></div></div></div>`;
+  const res = await Api.get('/wallet/transactions/', {page_size: 50});
+  const el = document.getElementById('all-tx-list');
+  if (res.ok && res.data.results?.length > 0) {
+    el.innerHTML = res.data.results.map(tx => renderTxItem(tx)).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin transacciones</p></div>';
+  }
+}
+
+// ---- TRANSFER PAGE ----
+function renderTransfer(c) {
+  c.innerHTML = `
+    <div class="page-header"><h4>Transferencias</h4></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner" style="text-align:center;padding:32px 20px">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--np-primary-50);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><i class="fas fa-paper-plane" style="font-size:1.5rem;color:var(--np-primary-light)"></i></div>
+        <h6 style="font-weight:700">Enviar dinero</h6>
+        <p style="font-size:.85rem;color:var(--np-gray);margin-bottom:20px">Transfiere a cualquier usuario NovaPay</p>
+        <button class="btn-np" style="max-width:280px;margin:0 auto" onclick="navigate('transfer-send')"><i class="fas fa-paper-plane me-2"></i>Nueva Transferencia</button>
+      </div>
+    </div>
+    <div class="np-card">
+      <div class="card-head"><h6>Transferencias recientes</h6></div>
+      <div class="card-inner" id="transfer-list"><div class="loading-center"><div class="spinner-np"></div></div></div>
+    </div>
+  `;
+  loadTransfers();
+}
+
+async function loadTransfers() {
+  const res = await Api.get('/transfers/list/', {page_size: 15});
+  const el = document.getElementById('transfer-list');
+  if (!el) return;
+  if (res.ok && res.data.results?.length > 0) {
+    el.innerHTML = res.data.results.map(t => {
+      const isSender = t.sender?.id === currentUser?.id;
+      return `<div class="tx-item">
+        <div class="tx-icon ${isSender?'out':'in'}"><i class="fas ${isSender?'fa-arrow-up':'fa-arrow-down'}"></i></div>
+        <div class="tx-info"><div class="tx-title">${isSender?'Enviado a '+(t.receiver?.first_name||t.receiver?.phone_number||''):'Recibido de '+(t.sender?.first_name||t.sender?.phone_number||'')}</div><div class="tx-date">${fmtDate(t.created_at)} &bull; <span class="badge-status badge-${t.status?.toLowerCase()}">${t.status}</span></div></div>
+        <div class="tx-amount ${isSender?'negative':'positive'}">${isSender?'-':'+'}${t.currency==='LLO'?fmtLLO(t.amount):fmtCOP(t.amount)}</div>
+      </div>`;
+    }).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-paper-plane"></i><p>Sin transferencias</p></div>';
+  }
+}
+
+// ---- SEND TRANSFER ----
+function renderTransferSend(c) {
+  c.innerHTML = `
+    <div class="page-header"><h4>Enviar Dinero</h4><p>Ingresa los datos de la transferencia</p></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner np-form">
+        <div id="transfer-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+        <div class="form-group">
+          <label class="form-label">Telefono del destinatario</label>
+          <input type="tel" class="form-control" id="tf-phone" placeholder="+573001234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto (COP)</label>
+          <input type="number" class="form-control" id="tf-amount" placeholder="0" min="1000" step="1000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Moneda</label>
+          <select class="form-select" id="tf-currency"><option value="COP">COP - Pesos Colombianos</option><option value="LLO">LLO - Llanocoin</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripcion (opcional)</label>
+          <input type="text" class="form-control" id="tf-desc" placeholder="Pago de...">
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;font-size:.85rem"><span style="color:var(--np-gray)">Saldo disponible</span><span style="font-weight:600">${fmtCOP(currentWallet?.balance_cop)}</span></div>
+        </div>
+        <button class="btn-np" id="tf-send-btn" onclick="sendTransfer()"><i class="fas fa-paper-plane me-2"></i>Enviar Transferencia</button>
+        <button class="btn-np-outline" style="margin-top:8px" onclick="navigate('transfer')">Cancelar</button>
+      </div>
+    </div>
+  `;
+}
+
+async function sendTransfer() {
+  const btn = document.getElementById('tf-send-btn');
+  const alertEl = document.getElementById('transfer-alert');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+  const data = {
+    receiver_phone: document.getElementById('tf-phone').value.trim(),
+    amount: document.getElementById('tf-amount').value,
+    currency: document.getElementById('tf-currency').value,
+    description: document.getElementById('tf-desc').value.trim()
+  };
+  const res = await Api.post('/transfers/send/', data);
+  if (res.ok) {
+    if (res.data.status === 'OTP_REQUIRED') {
+      showTransferOTPModal(res.data.id);
+    } else {
+      showToast('Transferencia exitosa!');
+      refreshWallet();
+      navigate('transfer');
+    }
+  } else {
+    alertEl.className = 'alert-np error';
+    alertEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (res.data.detail || Object.values(res.data).flat().join('. ') || 'Error al enviar');
+    alertEl.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Transferencia';
+}
+
+function showTransferOTPModal(transferId) {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="np-modal-overlay" onclick="closeModal(event)">
+      <div class="np-modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-head"><h5>Confirmar Transferencia</h5></div>
+        <div class="modal-body-c np-form">
+          <p style="font-size:.9rem;color:var(--np-gray);margin-bottom:16px">Se envio un codigo OTP a tu telefono. Ingresalo para confirmar la transferencia.</p>
+          <div class="form-group">
+            <input type="text" class="form-control text-center" id="tf-otp" placeholder="000000" maxlength="6" style="font-size:1.3rem;letter-spacing:6px;font-weight:700">
+          </div>
+          <button class="btn-np" onclick="confirmTransfer('${transferId}')">Confirmar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function confirmTransfer(id) {
+  const code = document.getElementById('tf-otp').value.trim();
+  const res = await Api.post('/transfers/confirm/', {transfer_id: id, otp_code: code});
+  if (res.ok) {
+    closeModal();
+    showToast('Transferencia confirmada!');
+    refreshWallet();
+    navigate('transfer');
+  } else {
+    showToast('Codigo incorrecto');
+  }
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+async function refreshWallet() {
+  const res = await Api.get('/wallet/balance/');
+  if (res.ok) currentWallet = res.data;
+}
+
+// ---- MARKETPLACE ----
+async function renderMarketplace(c) {
+  c.innerHTML = `
+    <div class="page-header"><h4>Marketplace</h4><p>Comercios cerca de ti</p></div>
+    <div style="padding:0 20px;margin-bottom:16px;max-width:560px;margin-left:auto;margin-right:auto">
+      <div class="input-icon" style="position:relative"><i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--np-gray)"></i>
+      <input type="text" class="form-control" id="mkt-search" placeholder="Buscar comercios..." style="padding-left:40px;border-radius:10px;border:1.5px solid var(--np-border)" oninput="searchMerchants()"></div>
+    </div>
+    <div id="mkt-categories" class="np-tabs"></div>
+    <div class="np-card"><div class="card-inner" id="mkt-list"><div class="loading-center"><div class="spinner-np"></div></div></div></div>
+  `;
+  const [catRes, mRes] = await Promise.all([Api.get('/marketplace/categories/'), Api.get('/marketplace/merchants/', {page_size: 20})]);
+  if (catRes.ok) {
+    const cats = catRes.data.results || catRes.data || [];
+    document.getElementById('mkt-categories').innerHTML = '<div class="np-tab active" data-cat="">Todos</div>' + cats.map(c => `<div class="np-tab" data-cat="${c.slug}">${c.name}</div>`).join('');
+    document.querySelectorAll('#mkt-categories .np-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#mkt-categories .np-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        loadMerchants(tab.dataset.cat);
+      });
+    });
+  }
+  renderMerchantList(mRes);
+}
+
+async function loadMerchants(category) {
+  const el = document.getElementById('mkt-list');
+  el.innerHTML = '<div class="loading-center"><div class="spinner-np"></div></div>';
+  const params = {page_size: 20};
+  if (category) params.category = category;
+  const search = document.getElementById('mkt-search')?.value?.trim();
+  if (search) params.search = search;
+  const res = await Api.get('/marketplace/merchants/', params);
+  renderMerchantList(res);
+}
+
+let searchTimeout;
+function searchMerchants() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => loadMerchants(''), 300);
+}
+
+function renderMerchantList(res) {
+  const el = document.getElementById('mkt-list');
+  if (!el) return;
+  if (res.ok) {
+    const merchants = res.data.results || res.data || [];
+    if (merchants.length > 0) {
+      el.innerHTML = merchants.map(m => `
+        <div class="merchant-item" onclick="window._merchant='${m.slug}';navigate('merchant-detail')">
+          <div class="m-avatar"><i class="fas fa-store"></i></div>
+          <div class="m-info"><div class="m-name">${m.business_name}</div><div class="m-cat">${m.category?.name||''} &bull; ${m.city||''}, ${m.department||''}</div></div>
+          <div class="m-rating"><i class="fas fa-star me-1"></i>${(m.rating||0).toFixed(1)}</div>
+        </div>`).join('');
+    } else {
+      el.innerHTML = '<div class="empty-state"><i class="fas fa-store"></i><p>No se encontraron comercios</p></div>';
+    }
+  }
+}
+
+// ---- MERCHANT DETAIL ----
+async function renderMerchantDetail(c) {
+  c.innerHTML = '<div class="loading-center"><div class="spinner-np"></div></div>';
+  const res = await Api.get('/marketplace/merchants/' + (window._merchant || '') + '/');
+  if (!res.ok) { c.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Comercio no encontrado</p></div>'; return; }
+  const m = res.data;
+  c.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:center;gap:8px"><a href="#" onclick="navigate('marketplace')" style="color:var(--np-gray)"><i class="fas fa-arrow-left"></i></a><h4>${m.business_name}</h4></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner" style="text-align:center;padding:24px">
+        <div style="width:72px;height:72px;border-radius:50%;background:var(--np-primary-50);display:inline-flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--np-primary-light);margin-bottom:12px"><i class="fas fa-store"></i></div>
+        <h5 style="font-weight:700">${m.business_name}</h5>
+        <p style="color:var(--np-gray);font-size:.85rem">${m.category?.name||''} &bull; ${m.city||''}, ${m.department||''}</p>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:12px">
+          <div><span style="font-weight:700;color:var(--np-accent)"><i class="fas fa-star"></i> ${(m.rating||0).toFixed(1)}</span><br><small style="color:var(--np-gray)">Rating</small></div>
+          <div><span style="font-weight:700">${m.total_sales||0}</span><br><small style="color:var(--np-gray)">Ventas</small></div>
+        </div>
+        ${m.address ? `<p style="margin-top:16px;font-size:.85rem;color:var(--np-gray)"><i class="fas fa-map-marker-alt me-1"></i>${m.address}</p>` : ''}
+      </div>
+    </div>
+    <div class="np-card">
+      <div class="card-head"><h6>Pagar a este comercio</h6></div>
+      <div class="card-inner np-form">
+        <div id="pay-merchant-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+        <div class="form-group"><label class="form-label">Monto</label><input type="number" class="form-control" id="mp-amount" placeholder="0" min="100"></div>
+        <div class="form-group"><label class="form-label">Moneda</label><select class="form-select" id="mp-currency">
+          <option value="COP">COP</option>${m.accepts_llo?'<option value="LLO">LLO</option>':''}
+        </select></div>
+        <button class="btn-np" onclick="payMerchant('${m.id}')"><i class="fas fa-shopping-cart me-2"></i>Pagar</button>
+      </div>
+    </div>
+  `;
+}
+
+async function payMerchant(merchantId) {
+  const amount = document.getElementById('mp-amount').value;
+  const currency = document.getElementById('mp-currency').value;
+  const alertEl = document.getElementById('pay-merchant-alert');
+  const res = await Api.post('/marketplace/payments/', {merchant: merchantId, amount, currency});
+  if (res.ok) {
+    showToast('Pago exitoso!');
+    refreshWallet();
+    navigate('marketplace');
+  } else {
+    alertEl.className = 'alert-np error';
+    alertEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (res.data.detail || 'Error al pagar');
+    alertEl.classList.remove('hidden');
+  }
+}
+
+// ---- CRYPTO / LLANOCOIN ----
+async function renderCrypto(c) {
+  c.innerHTML = `
+    <div class="page-header"><h4>Crypto & Llanocoin</h4></div>
+    <div class="stat-mini">
+      <div class="sm-item"><div class="sm-val">${fmtLLO(currentWallet?.balance_llo)}</div><div class="sm-label">Mis LLO</div></div>
+      <div class="sm-item"><div class="sm-val">${fmtCOP(currentWallet?.llo_cop_equivalent||0)}</div><div class="sm-label">Valor en COP</div></div>
+    </div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-head"><h6>Tasas de Cambio</h6></div>
+      <div class="card-inner" id="crypto-rates"><div class="loading-center"><div class="spinner-np"></div></div></div>
+    </div>
+    <div class="np-card">
+      <div class="card-head"><h6>Comprar / Vender LLO</h6></div>
+      <div class="card-inner np-form">
+        <div id="crypto-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+        <div class="form-group">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn-np" id="crypto-buy-tab" style="flex:1" onclick="setCryptoAction('buy')">Comprar LLO</button>
+            <button class="btn-np-outline" id="crypto-sell-tab" style="flex:1" onclick="setCryptoAction('sell')">Vender LLO</button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label" id="crypto-label">Monto en COP</label><input type="number" class="form-control" id="crypto-amount" placeholder="0" min="1000"></div>
+        <button class="btn-np-gold" style="width:100%" id="crypto-action-btn" onclick="executeCrypto()"><i class="fas fa-coins me-2"></i>Comprar Llanocoin</button>
+      </div>
+    </div>
+    <div class="np-card">
+      <div class="card-head"><h6>Historial LLO</h6></div>
+      <div class="card-inner" id="crypto-history"><div class="loading-center"><div class="spinner-np"></div></div></div>
+    </div>
+  `;
+  window._cryptoAction = 'buy';
+  loadCryptoRates();
+  loadCryptoHistory();
+}
+
+async function loadCryptoRates() {
+  const res = await Api.get('/crypto/rates/');
+  const el = document.getElementById('crypto-rates');
+  if (!el) return;
+  if (res.ok) {
+    const rates = Array.isArray(res.data) ? res.data : (res.data.results || []);
+    if (rates.length > 0) {
+      el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">' +
+        rates.map(r => `<div style="text-align:center;padding:12px;background:#f8fafc;border-radius:10px"><div style="font-weight:700;font-size:1.1rem">${r.currency}</div><div style="font-size:.8rem;color:var(--np-gray)">${fmtCOP(r.rate_cop)}</div></div>`).join('') + '</div>';
+    } else {
+      el.innerHTML = '<p style="color:var(--np-gray);font-size:.85rem">No hay tasas disponibles</p>';
+    }
+  }
+}
+
+async function loadCryptoHistory() {
+  const res = await Api.get('/crypto/llanocoin/transactions/', {page_size: 10});
+  const el = document.getElementById('crypto-history');
+  if (!el) return;
+  if (res.ok && (res.data.results?.length > 0 || (Array.isArray(res.data) && res.data.length > 0))) {
+    const txs = res.data.results || res.data;
+    el.innerHTML = txs.map(tx => `<div class="tx-item">
+      <div class="tx-icon crypto"><i class="fas fa-coins"></i></div>
+      <div class="tx-info"><div class="tx-title">${tx.transaction_type}</div><div class="tx-date">${fmtDate(tx.created_at)}</div></div>
+      <div class="tx-amount">${fmtLLO(tx.amount_llo)}</div>
+    </div>`).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>Sin transacciones LLO</p></div>';
+  }
+}
+
+function setCryptoAction(action) {
+  window._cryptoAction = action;
+  document.getElementById('crypto-buy-tab').className = action==='buy'?'btn-np':'btn-np-outline';
+  document.getElementById('crypto-sell-tab').className = action==='sell'?'btn-np':'btn-np-outline';
+  document.getElementById('crypto-label').textContent = action==='buy'?'Monto en COP':'Cantidad de LLO';
+  document.getElementById('crypto-action-btn').innerHTML = action==='buy'?'<i class="fas fa-coins me-2"></i>Comprar Llanocoin':'<i class="fas fa-coins me-2"></i>Vender Llanocoin';
+}
+
+async function executeCrypto() {
+  const amount = document.getElementById('crypto-amount').value;
+  const alertEl = document.getElementById('crypto-alert');
+  const endpoint = window._cryptoAction === 'buy' ? '/crypto/llanocoin/buy/' : '/crypto/llanocoin/sell/';
+  const data = window._cryptoAction === 'buy' ? {amount_cop: amount} : {amount_llo: amount};
+  const res = await Api.post(endpoint, data);
+  if (res.ok) {
+    showToast(window._cryptoAction === 'buy' ? 'Compra exitosa!' : 'Venta exitosa!');
+    refreshWallet();
+    navigate('crypto');
+  } else {
+    alertEl.className = 'alert-np error';
+    alertEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (res.data.detail || 'Error');
+    alertEl.classList.remove('hidden');
+  }
+}
+
+// ---- MICROCREDIT ----
+async function renderMicrocredit(c) {
+  c.innerHTML = '<div class="loading-center"><div class="spinner-np"></div></div>';
+  const [profileRes, loansRes, productsRes] = await Promise.all([
+    Api.get('/microcredit/profile/'),
+    Api.get('/microcredit/loans/', {page_size: 10}),
+    Api.get('/microcredit/products/')
+  ]);
+  const profile = profileRes.ok ? profileRes.data : {};
+  const loans = loansRes.ok ? (loansRes.data.results || loansRes.data || []) : [];
+  const products = productsRes.ok ? (productsRes.data.results || productsRes.data || []) : [];
+  const score = profile.credit_score || 0;
+  const maxCredit = profile.max_credit_amount || 0;
+  const scoreColor = score >= 700 ? 'var(--np-success)' : score >= 400 ? 'var(--np-warning)' : 'var(--np-danger)';
+
+  c.innerHTML = `
+    <div class="page-header"><h4>Microcredito</h4><p>Tu perfil crediticio y prestamos</p></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner" style="text-align:center;padding:24px">
+        <div class="score-gauge">
+          <canvas id="score-canvas" width="180" height="180"></canvas>
+          <div class="score-val"><div class="num" style="color:${scoreColor}">${score}</div><div class="label">Puntaje</div></div>
+        </div>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:16px">
+          <div><span style="font-weight:700">${fmtCOP(maxCredit)}</span><br><small style="color:var(--np-gray)">Credito max.</small></div>
+          <div><span style="font-weight:700">${profile.active_loans||0}</span><br><small style="color:var(--np-gray)">Activos</small></div>
+          <div><span style="font-weight:700">${profile.total_loans||0}</span><br><small style="color:var(--np-gray)">Total</small></div>
+        </div>
+      </div>
+    </div>
+    ${products.length > 0 ? `
+    <div class="np-card">
+      <div class="card-head"><h6>Productos Disponibles</h6></div>
+      <div class="card-inner">
+        ${products.map(p => `
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="window._product=${p.id};navigate('microcredit-request')">
+            <div style="width:44px;height:44px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center"><i class="fas fa-hand-holding-usd" style="color:var(--np-info)"></i></div>
+            <div style="flex:1"><div style="font-weight:600;font-size:.9rem">${p.name}</div><div style="font-size:.75rem;color:var(--np-gray)">${fmtCOP(p.min_amount)} - ${fmtCOP(p.max_amount)} &bull; ${p.interest_rate_monthly}%/mes &bull; ${p.term_days} dias</div></div>
+            <i class="fas fa-chevron-right" style="color:#d1d5db"></i>
+          </div>
+        `).join('')}
+      </div>
+    </div>` : ''}
+    <div class="np-card">
+      <div class="card-head"><h6>Mis Prestamos</h6></div>
+      <div class="card-inner">
+        ${loans.length > 0 ? loans.map(l => `
+          <div class="tx-item">
+            <div class="tx-icon loan"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="tx-info"><div class="tx-title">${l.product?.name||'Prestamo'}</div><div class="tx-date">${fmtDate(l.created_at)} &bull; <span class="badge-status badge-${l.status?.toLowerCase()}">${l.status}</span></div></div>
+            <div class="tx-amount">${fmtCOP(l.amount_approved||l.amount_requested)}</div>
+          </div>
+        `).join('') : '<div class="empty-state"><i class="fas fa-hand-holding-usd"></i><p>No tienes prestamos</p></div>'}
+      </div>
+    </div>
+  `;
+  // Draw score gauge
+  setTimeout(() => {
+    const canvas = document.getElementById('score-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const cx = 90, cy = 90, r = 75;
+    ctx.lineWidth = 12; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0.75*Math.PI, 2.25*Math.PI); ctx.strokeStyle = '#e5e7eb'; ctx.stroke();
+    const pct = Math.min(score / 1000, 1);
+    const endAngle = 0.75*Math.PI + pct * 1.5 * Math.PI;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0.75*Math.PI, endAngle); ctx.strokeStyle = scoreColor; ctx.stroke();
+  }, 100);
+}
+
+// ---- MICROCREDIT REQUEST ----
+async function renderMicrocreditRequest(c) {
+  c.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:center;gap:8px"><a href="#" onclick="navigate('microcredit')" style="color:var(--np-gray)"><i class="fas fa-arrow-left"></i></a><h4>Solicitar Credito</h4></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner np-form">
+        <div id="mc-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+        <div class="form-group"><label class="form-label">Monto solicitado (COP)</label><input type="number" class="form-control" id="mc-amount" placeholder="500000" min="50000"></div>
+        <div class="form-group"><label class="form-label">Proposito</label><input type="text" class="form-control" id="mc-purpose" placeholder="Para que necesitas el credito?"></div>
+        <button class="btn-np" onclick="requestMicrocredit()"><i class="fas fa-hand-holding-usd me-2"></i>Solicitar Credito</button>
+      </div>
+    </div>
+  `;
+}
+
+async function requestMicrocredit() {
+  const amount = document.getElementById('mc-amount').value;
+  const purpose = document.getElementById('mc-purpose')?.value || '';
+  const alertEl = document.getElementById('mc-alert');
+  const data = {amount_requested: amount, product: window._product};
+  if (purpose) data.purpose = purpose;
+  const res = await Api.post('/microcredit/request/', data);
+  if (res.ok) {
+    showToast('Solicitud enviada!');
+    navigate('microcredit');
+  } else {
+    alertEl.className = 'alert-np error';
+    alertEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (res.data.detail || Object.values(res.data).flat().join('. ') || 'Error');
+    alertEl.classList.remove('hidden');
+  }
+}
+
+// ---- NOTIFICATIONS ----
+async function renderNotifications(c) {
+  c.innerHTML = `<div class="page-header"><h4>Notificaciones</h4></div>
+    <div style="padding:0 20px;margin-bottom:12px;max-width:560px;margin-left:auto;margin-right:auto"><button class="btn-np-outline" style="font-size:.8rem;padding:8px 16px;width:auto" onclick="markAllRead()"><i class="fas fa-check-double me-2"></i>Marcar todo como leido</button></div>
+    <div class="np-card"><div class="card-inner" id="notif-list"><div class="loading-center"><div class="spinner-np"></div></div></div></div>`;
+  const res = await Api.get('/notifications/', {page_size: 30});
+  const el = document.getElementById('notif-list');
+  if (res.ok && (res.data.results?.length > 0)) {
+    el.innerHTML = res.data.results.map(n => `
+      <div class="notif-item ${n.is_read?'':'unread'}">
+        <div class="ni-icon"><i class="fas fa-bell"></i></div>
+        <div class="ni-content"><div class="ni-title">${n.title||n.notification_type}</div><div class="ni-msg">${n.message||''}</div><div class="ni-time">${fmtDate(n.created_at)}</div></div>
+      </div>
+    `).join('');
+  } else {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Sin notificaciones</p></div>';
+  }
+  document.getElementById('notif-dot').classList.add('hidden');
+}
+
+async function markAllRead() {
+  await Api.post('/notifications/mark-all-read/');
+  showToast('Notificaciones marcadas como leidas');
+  navigate('notifications');
+}
+
+// ---- PROFILE ----
+async function renderProfile(c) {
+  const u = currentUser || {};
+  c.innerHTML = `
+    <div class="page-section" style="text-align:center;padding-top:24px">
+      <div class="profile-avatar">${(u.first_name||'U')[0].toUpperCase()}</div>
+      <h5 style="font-weight:700">${u.first_name||''} ${u.last_name||''}</h5>
+      <p style="color:var(--np-gray);font-size:.85rem">${u.phone_number||''}</p>
+      ${u.is_verified?'<span class="badge-status badge-completed"><i class="fas fa-check me-1"></i>Verificado</span>':'<span class="badge-status badge-pending">No verificado</span>'}
+    </div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><small style="color:var(--np-gray);font-size:.75rem">Email</small><div style="font-weight:500;font-size:.9rem">${u.email||'No registrado'}</div></div>
+          <div><small style="color:var(--np-gray);font-size:.75rem">Documento</small><div style="font-weight:500;font-size:.9rem">${u.document_type||''} ${u.document_number||''}</div></div>
+          <div><small style="color:var(--np-gray);font-size:.75rem">Ciudad</small><div style="font-weight:500;font-size:.9rem">${u.city||'No registrada'}</div></div>
+          <div><small style="color:var(--np-gray);font-size:.75rem">Departamento</small><div style="font-weight:500;font-size:.9rem">${u.department||'No registrado'}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="np-card">
+      <div class="card-inner profile-menu">
+        <div class="pm-item" onclick="showEditProfile()"><i style="background:var(--np-primary-50);color:var(--np-primary-light)" class="fas fa-user-edit"></i><div class="pm-text">Editar Perfil</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="showChangePassword()"><i style="background:#eff6ff;color:var(--np-info)" class="fas fa-lock"></i><div class="pm-text">Cambiar Contrasena</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="navigate('notifications')"><i style="background:#fff8e1;color:var(--np-accent-dark)" class="fas fa-bell"></i><div class="pm-text">Notificaciones</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="logout()"><i style="background:#fef2f2;color:var(--np-danger)" class="fas fa-sign-out-alt"></i><div class="pm-text" style="color:var(--np-danger)">Cerrar Sesion</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+      </div>
+    </div>
+  `;
+}
+
+function showEditProfile() {
+  const u = currentUser || {};
+  document.getElementById('modal-container').innerHTML = `
+    <div class="np-modal-overlay" onclick="closeModal(event)">
+      <div class="np-modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-head"><h5>Editar Perfil</h5></div>
+        <div class="modal-body-c np-form">
+          <div id="edit-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+          <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-control" id="edit-fname" value="${u.first_name||''}"></div>
+          <div class="form-group"><label class="form-label">Apellido</label><input type="text" class="form-control" id="edit-lname" value="${u.last_name||''}"></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="edit-email" value="${u.email||''}"></div>
+          <div class="form-group"><label class="form-label">Ciudad</label><input type="text" class="form-control" id="edit-city" value="${u.city||''}"></div>
+          <button class="btn-np" onclick="saveProfile()"><i class="fas fa-save me-2"></i>Guardar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function saveProfile() {
+  const data = {
+    first_name: document.getElementById('edit-fname').value.trim(),
+    last_name: document.getElementById('edit-lname').value.trim(),
+    email: document.getElementById('edit-email').value.trim(),
+    city: document.getElementById('edit-city').value.trim(),
+  };
+  const res = await Api.patch('/auth/profile/', data);
+  if (res.ok) {
+    currentUser = {...currentUser, ...res.data};
+    closeModal();
+    showToast('Perfil actualizado');
+    navigate('profile');
+  } else {
+    const el = document.getElementById('edit-alert');
+    el.className = 'alert-np error';
+    el.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + (res.data.detail || 'Error');
+    el.classList.remove('hidden');
+  }
+}
+
+function showChangePassword() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="np-modal-overlay" onclick="closeModal(event)">
+      <div class="np-modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-head"><h5>Cambiar Contrasena</h5></div>
+        <div class="modal-body-c np-form">
+          <div id="pw-alert" class="alert-np hidden" style="margin-bottom:16px"></div>
+          <div class="form-group"><label class="form-label">Contrasena actual</label><input type="password" class="form-control" id="pw-current"></div>
+          <div class="form-group"><label class="form-label">Nueva contrasena</label><input type="password" class="form-control" id="pw-new" minlength="8"></div>
+          <div class="form-group"><label class="form-label">Confirmar nueva</label><input type="password" class="form-control" id="pw-confirm"></div>
+          <button class="btn-np" onclick="changePassword()"><i class="fas fa-lock me-2"></i>Cambiar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function changePassword() {
+  const current = document.getElementById('pw-current').value;
+  const newPw = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+  const alertEl = document.getElementById('pw-alert');
+  if (newPw !== confirm) { alertEl.className='alert-np error'; alertEl.innerHTML='Las contrasenas no coinciden'; alertEl.classList.remove('hidden'); return; }
+  const res = await Api.post('/auth/change-password/', {old_password: current, new_password: newPw});
+  if (res.ok) { closeModal(); showToast('Contrasena cambiada'); } else {
+    alertEl.className='alert-np error'; alertEl.innerHTML='<i class="fas fa-exclamation-circle me-2"></i>'+(res.data.detail||'Error'); alertEl.classList.remove('hidden');
+  }
+}
+
+// ---- MORE PAGE ----
+function renderMore(c) {
+  c.innerHTML = `
+    <div class="page-header"><h4>Mas Opciones</h4></div>
+    <div class="np-card" style="margin-top:16px">
+      <div class="card-inner profile-menu">
+        <div class="pm-item" onclick="navigate('crypto')"><i style="background:#fff8e1;color:var(--np-accent-dark)" class="fas fa-coins"></i><div class="pm-text">Crypto & Llanocoin</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="navigate('microcredit')"><i style="background:#eff6ff;color:var(--np-info)" class="fas fa-hand-holding-usd"></i><div class="pm-text">Microcredito</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="navigate('transactions')"><i style="background:var(--np-primary-50);color:var(--np-primary-light)" class="fas fa-list"></i><div class="pm-text">Historial Completo</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="navigate('notifications')"><i style="background:#f5f3ff;color:#7c3aed" class="fas fa-bell"></i><div class="pm-text">Notificaciones</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+        <div class="pm-item" onclick="navigate('profile')"><i style="background:#fef2f2;color:var(--np-danger)" class="fas fa-user-cog"></i><div class="pm-text">Mi Perfil</div><i class="fas fa-chevron-right pm-arrow"></i></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:32px 20px;color:var(--np-gray);font-size:.8rem">
+      <p>NovaPay v1.0</p>
+      <p style="margin-top:4px">Billetera digital de los Llanos Orientales</p>
+    </div>
+  `;
+}
+
+// ---- BOOT ----
+(async function boot() {
+  const token = Storage.getToken();
+  if (token) {
+    await loadApp();
+  } else {
+    document.getElementById('auth-view').classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>

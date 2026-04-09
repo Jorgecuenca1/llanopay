@@ -1,0 +1,174 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Exchange Rates Cards -->
+<div class="row g-3 mb-4">
+    {% for rate in exchange_rates %}
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">{{ rate.get_currency_display }}</div>
+                    <div class="stat-value">${{ rate.rate_cop|floatformat:0 }}</div>
+                    <div style="font-size:.72rem; color:#9ca3af;">COP / 1 {{ rate.currency }}</div>
+                </div>
+                <div class="stat-icon {% if rate.currency == 'BTC' %}gold{% elif rate.currency == 'ETH' %}purple{% elif rate.currency == 'LLO' %}green{% else %}blue{% endif %}">
+                    {% if rate.currency == 'BTC' %}
+                    <i class="fab fa-bitcoin"></i>
+                    {% elif rate.currency == 'ETH' %}
+                    <i class="fab fa-ethereum"></i>
+                    {% elif rate.currency == 'LLO' %}
+                    <i class="fas fa-coins"></i>
+                    {% else %}
+                    <i class="fas fa-dollar-sign"></i>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="font-size:.72rem; color:#9ca3af; margin-top:8px;">
+                <i class="fas fa-sync-alt me-1"></i> {{ rate.updated_at|date:"d/m/Y H:i" }} &middot; {{ rate.source }}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="stat-card text-center text-muted py-3">
+            No hay tasas de cambio configuradas
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- LLO Circulation Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">LLO en Circulacion</div>
+                    <div class="stat-value">{{ total_llo_circulation|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon green"><i class="fas fa-globe"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total LLO Comprados</div>
+                    <div class="stat-value">{{ total_llo_bought|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon gold"><i class="fas fa-shopping-cart"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="stat-label">Total LLO Vendidos</div>
+                    <div class="stat-value">{{ total_llo_sold|floatformat:2 }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-tag"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Deposits -->
+<div class="lp-card mb-4">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-clock me-2" style="color: var(--lp-gold);"></i>Depositos Pendientes</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Cripto</th>
+                    <th>Cantidad</th>
+                    <th>Red</th>
+                    <th>Confirmaciones</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in pending_deposits %}
+                <tr>
+                    <td style="font-size:.85rem;">{{ d.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ d.user.full_name }}</td>
+                    <td><strong>{{ d.currency }}</strong></td>
+                    <td>{{ d.amount }}</td>
+                    <td style="font-size:.85rem;">{{ d.get_network_display }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress" style="width:60px; height:6px;">
+                                {% widthratio d.confirmations d.required_confirmations 100 as pct %}
+                                <div class="progress-bar bg-warning" style="width:{{ pct }}%"></div>
+                            </div>
+                            <span style="font-size:.8rem;">{{ d.confirmations }}/{{ d.required_confirmations }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-status badge-pending">{{ d.get_status_display }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No hay depositos pendientes</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- All Deposits History -->
+<div class="lp-card">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-history me-2" style="color: var(--lp-green);"></i>Historial de Depositos Crypto</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Cripto</th>
+                    <th>Cantidad</th>
+                    <th>Monto COP</th>
+                    <th>Tasa</th>
+                    <th>Red</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in all_deposits %}
+                <tr>
+                    <td style="font-size:.85rem;">{{ d.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ d.user.full_name|truncatewords:3 }}</td>
+                    <td><strong>{{ d.currency }}</strong></td>
+                    <td>{{ d.amount }}</td>
+                    <td>${{ d.cop_amount|floatformat:0 }}</td>
+                    <td style="font-size:.85rem; color:#6b7280;">${{ d.exchange_rate|floatformat:0 }}</td>
+                    <td style="font-size:.85rem;">{{ d.get_network_display }}</td>
+                    <td>
+                        <span class="badge-status
+                            {% if d.status == 'CREDITED' or d.status == 'CONFIRMED' %}badge-completed
+                            {% elif d.status == 'PENDING' or d.status == 'CONFIRMING' %}badge-pending
+                            {% else %}badge-failed{% endif %}">
+                            {{ d.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No hay depositos registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

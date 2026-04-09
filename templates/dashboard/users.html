@@ -1,0 +1,136 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" action="{% url 'dashboard:users' %}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Buscar usuario</label>
+                <input type="text" class="form-control" name="q" value="{{ search }}"
+                       placeholder="Telefono, nombre o documento...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:.8rem; font-weight:600; color:#6b7280;">Estado</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verificados</option>
+                    <option value="unverified" {% if status_filter == 'unverified' %}selected{% endif %}>No verificados</option>
+                    <option value="merchant" {% if status_filter == 'merchant' %}selected{% endif %}>Comerciantes</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-lp-primary w-100">
+                    <i class="fas fa-search me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-md-3 text-end">
+                <span class="text-muted" style="font-size:.85rem;">
+                    <strong>{{ total }}</strong> usuarios encontrados
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="lp-card">
+    <div class="table-responsive">
+        <table class="table lp-table">
+            <thead>
+                <tr>
+                    <th>Telefono</th>
+                    <th>Nombre</th>
+                    <th>Documento</th>
+                    <th>Estado</th>
+                    <th>Tipo</th>
+                    <th>Saldo COP</th>
+                    <th>Saldo LLO</th>
+                    <th>Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--lp-green);">{{ user.phone_number }}</strong>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:32px; height:32px; border-radius:50%; background: var(--lp-green-50); color: var(--lp-green); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:.75rem;">
+                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                            </div>
+                            <span>{{ user.full_name }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-size:.8rem; color:#6b7280;">{{ user.get_document_type_display }}</span><br>
+                        {{ user.document_number }}
+                    </td>
+                    <td>
+                        {% if user.is_verified %}
+                        <span class="badge-verified"><i class="fas fa-check-circle me-1"></i>Verificado</span>
+                        {% else %}
+                        <span class="badge-status badge-pending">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_merchant %}
+                        <span class="badge-merchant"><i class="fas fa-store me-1"></i>Comerciante</span>
+                        {% else %}
+                        <span style="font-size:.8rem; color:#9ca3af;">Usuario</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user._wallet_cache %}
+                        ${{ user._wallet_cache.balance_cop|floatformat:0 }}
+                        {% else %}
+                        <span style="color:#d1d5db;">--</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user._wallet_cache %}
+                        {{ user._wallet_cache.balance_llo|floatformat:2 }}
+                        {% else %}
+                        <span style="color:#d1d5db;">--</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.85rem; color:#6b7280;">
+                        {{ user.created_at|date:"d/m/Y" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No se encontraron usuarios</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center py-3">
+        <nav>
+            <ul class="pagination lp-pagination mb-0">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"-1" }}&q={{ search }}&status={{ status_filter }}">&laquo;</a>
+                </li>
+                {% endif %}
+                {% for p in page_range %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}&q={{ search }}&status={{ status_filter }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page|add:"1" }}&q={{ search }}&status={{ status_filter }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
