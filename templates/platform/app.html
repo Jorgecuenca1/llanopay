@@ -377,20 +377,32 @@ function showAlert(msg, type='error') {
 }
 function hideAlert() { document.getElementById('auth-alert').classList.add('hidden'); }
 
+// Auto-format phone: ensure +57 prefix
+function formatPhone(raw) {
+  let p = raw.replace(/[\s\-\(\)]/g, '');
+  if (p.startsWith('57') && !p.startsWith('+')) p = '+' + p;
+  if (p.startsWith('3') && p.length === 10) p = '+57' + p;
+  if (!p.startsWith('+')) p = '+' + p;
+  return p;
+}
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('login-btn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Ingresando...';
-  const phone = document.getElementById('login-phone').value.trim();
+  const phone = formatPhone(document.getElementById('login-phone').value);
   const password = document.getElementById('login-password').value;
+  console.log('Login attempt:', phone);
   const res = await Api.post('/auth/login/', {phone_number: phone, password});
+  console.log('Login response:', res.status, res.data);
   if (res.ok && (res.data.access || res.data.tokens)) {
     const access = res.data.access || res.data.tokens?.access;
     const refresh = res.data.refresh || res.data.tokens?.refresh;
     Storage.setTokens(access, refresh);
     await loadApp();
   } else {
-    showAlert(res.data.detail || res.data.non_field_errors?.[0] || 'Credenciales incorrectas');
+    const err = res.data.non_field_errors?.[0] || res.data.detail || Object.values(res.data).flat().join('. ') || 'Credenciales incorrectas';
+    showAlert(err);
   }
   btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesion';
 });
@@ -400,7 +412,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const btn = document.getElementById('reg-btn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
   const data = {
-    phone_number: document.getElementById('reg-phone').value.trim(),
+    phone_number: formatPhone(document.getElementById('reg-phone').value),
     first_name: document.getElementById('reg-fname').value.trim(),
     last_name: document.getElementById('reg-lname').value.trim(),
     email: document.getElementById('reg-email').value.trim(),
@@ -682,7 +694,7 @@ async function sendTransfer() {
   const alertEl = document.getElementById('transfer-alert');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
   const data = {
-    receiver_phone: document.getElementById('tf-phone').value.trim(),
+    receiver_phone: formatPhone(document.getElementById('tf-phone').value),
     amount: document.getElementById('tf-amount').value,
     currency: document.getElementById('tf-currency').value,
     description: document.getElementById('tf-desc').value.trim()
