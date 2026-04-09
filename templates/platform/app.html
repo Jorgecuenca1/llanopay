@@ -384,8 +384,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const phone = document.getElementById('login-phone').value.trim();
   const password = document.getElementById('login-password').value;
   const res = await Api.post('/auth/login/', {phone_number: phone, password});
-  if (res.ok && res.data.tokens) {
-    Storage.setTokens(res.data.tokens.access, res.data.tokens.refresh);
+  if (res.ok && (res.data.access || res.data.tokens)) {
+    const access = res.data.access || res.data.tokens?.access;
+    const refresh = res.data.refresh || res.data.tokens?.refresh;
+    Storage.setTokens(access, refresh);
     await loadApp();
   } else {
     showAlert(res.data.detail || res.data.non_field_errors?.[0] || 'Credenciales incorrectas');
