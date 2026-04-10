@@ -204,19 +204,27 @@ body{background:var(--np-light);color:var(--np-dark);margin:0}
 <div id="app-view" class="hidden">
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <aside class="app-sidebar" id="sidebar">
-<div class="sb-brand"><div class="bi">SN</div><div><h5>SuperNova</h5><small>Plataforma Digital</small></div></div>
+<div class="sb-brand"><div class="bi">SN</div><div><h5>SuperNova</h5><small>Global Wallet</small></div></div>
 <nav class="mt-2">
 <div class="nav-section">Principal</div>
 <a class="nav-link active" data-page="home" onclick="navigate('home')"><i class="fas fa-home"></i> Inicio</a>
 <a class="nav-link" data-page="wallet" onclick="navigate('wallet')"><i class="fas fa-wallet"></i> Mi Billetera</a>
-<div class="nav-section mt-3">Operaciones</div>
+<a class="nav-link" data-page="topup" onclick="navigate('topup')"><i class="fas fa-plus-circle"></i> Recargar Saldo</a>
+<div class="nav-section mt-3">Pagos</div>
 <a class="nav-link" data-page="transfer" onclick="navigate('transfer')"><i class="fas fa-paper-plane"></i> Transferencias</a>
-<a class="nav-link" data-page="crypto" onclick="navigate('crypto')"><i class="fas fa-coins"></i> Crypto / Llanocoin</a>
+<a class="nav-link" data-page="qr" onclick="navigate('qr')"><i class="fas fa-qrcode"></i> Pago QR</a>
+<a class="nav-link" data-page="mobile-topup" onclick="navigate('mobile-topup')"><i class="fas fa-mobile-alt"></i> Recargas Móvil</a>
+<a class="nav-link" data-page="bills" onclick="navigate('bills')"><i class="fas fa-file-invoice"></i> Pagar Servicios</a>
+<div class="nav-section mt-3">Productos</div>
+<a class="nav-link" data-page="crypto" onclick="navigate('crypto')"><i class="fas fa-coins"></i> Crypto</a>
 <a class="nav-link" data-page="marketplace" onclick="navigate('marketplace')"><i class="fas fa-store"></i> Marketplace</a>
-<div class="nav-section mt-3">Finanzas</div>
-<a class="nav-link" data-page="microcredit" onclick="navigate('microcredit')"><i class="fas fa-hand-holding-usd"></i> Microcredito</a>
-<a class="nav-link" data-page="notifications" onclick="navigate('notifications')"><i class="fas fa-bell"></i> Notificaciones</a>
+<a class="nav-link" data-page="cards" onclick="navigate('cards')"><i class="far fa-credit-card"></i> Tarjetas</a>
+<a class="nav-link" data-page="microcredit" onclick="navigate('microcredit')"><i class="fas fa-hand-holding-usd"></i> Crédito</a>
+<div class="nav-section mt-3">Recompensas</div>
+<a class="nav-link" data-page="rewards" onclick="navigate('rewards')"><i class="fas fa-gift"></i> Mis Puntos</a>
+<a class="nav-link" data-page="referrals" onclick="navigate('referrals')"><i class="fas fa-user-friends"></i> Referidos</a>
 <div class="nav-section mt-3">Cuenta</div>
+<a class="nav-link" data-page="notifications" onclick="navigate('notifications')"><i class="fas fa-bell"></i> Notificaciones</a>
 <a class="nav-link" data-page="profile" onclick="navigate('profile')"><i class="fas fa-user-cog"></i> Mi Perfil</a>
 </nav>
 <div class="sb-footer">
@@ -319,10 +327,10 @@ async function refreshW(){const r=await Api.get('/wallet/balance/');if(r.ok)W=r.
 function navigate(pg){
   PAGE=pg;
   document.querySelectorAll('.app-sidebar .nav-link').forEach(n=>n.classList.toggle('active',n.dataset.page===pg));
-  const titles={home:'Inicio',wallet:'Mi Billetera',transfer:'Transferencias',crypto:'Crypto & Llanocoin',marketplace:'Marketplace',microcredit:'Microcredito',notifications:'Notificaciones',profile:'Mi Perfil','transfer-send':'Enviar Dinero','merchant-detail':'Detalle Comercio','microcredit-request':'Solicitar Credito'};
+  const titles={home:'Inicio',wallet:'Mi Billetera',transfer:'Transferencias',crypto:'Crypto',marketplace:'Marketplace',microcredit:'Crédito',notifications:'Notificaciones',profile:'Mi Perfil','transfer-send':'Enviar Dinero','merchant-detail':'Detalle Comercio','microcredit-request':'Solicitar Crédito',topup:'Recargar Saldo',qr:'Pagos QR','qr-create':'Generar QR','qr-pay':'Pagar QR','mobile-topup':'Recargas Móvil',bills:'Pagar Servicios',cards:'Tarjetas Virtuales',rewards:'Mis Puntos',referrals:'Referidos'};
   document.getElementById('page-title').textContent=titles[pg]||'SuperNova';
   const c=document.getElementById('app-main');
-  const pages={home:pgHome,wallet:pgWallet,transfer:pgTransfer,crypto:pgCrypto,marketplace:pgMarketplace,microcredit:pgMicrocredit,notifications:pgNotifications,profile:pgProfile,'transfer-send':pgTransferSend,'merchant-detail':pgMerchantDetail,'microcredit-request':pgMicrocreditRequest};
+  const pages={home:pgHome,wallet:pgWallet,transfer:pgTransfer,crypto:pgCrypto,marketplace:pgMarketplace,microcredit:pgMicrocredit,notifications:pgNotifications,profile:pgProfile,'transfer-send':pgTransferSend,'merchant-detail':pgMerchantDetail,'microcredit-request':pgMicrocreditRequest,topup:pgTopup,qr:pgQR,'qr-create':pgQRCreate,'qr-pay':pgQRPay,'mobile-topup':pgMobileTopup,bills:pgBills,cards:pgCards,rewards:pgRewards,referrals:pgReferrals};
   (pages[pg]||pgHome)(c);
   window.scrollTo(0,0);
   if(window.innerWidth<992)toggleSidebar();
@@ -609,6 +617,329 @@ function changePw(){
   </div></div></div>`;
 }
 async function doPwChange(){if(document.getElementById('pw-new').value!==document.getElementById('pw-conf').value){showAlert('pw-alert','Las contrasenas no coinciden');return}const r=await Api.post('/auth/change-password/',{old_password:document.getElementById('pw-old').value,new_password:document.getElementById('pw-new').value});if(r.ok){closeModal();toast('Contrasena cambiada')}else{showAlert('pw-alert',r.data.old_password?.[0]||r.data.detail||'Error')}}
+
+// ===== GLOBAL FEATURES API =====
+const ApiG={
+  get:(p,d)=>Api.req('GET','/global'+p,d),
+  post:(p,d)=>Api.req('POST','/global'+p,d),
+  patch:(p,d)=>Api.req('PATCH','/global'+p,d),
+  del:(p)=>Api.req('DELETE','/global'+p),
+};
+
+// ===== TOPUP WALLET =====
+function pgTopup(c){
+  c.innerHTML=`
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="stat-card"><div class="sc-icon green mb-2"><i class="fas fa-wallet"></i></div><div class="sc-val">${fmtCOP(W?.balance_cop)}</div><div class="sc-label">Saldo COP actual</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><div class="sc-icon gold mb-2"><i class="fas fa-coins"></i></div><div class="sc-val">${fmtLLO(W?.balance_llo)}</div><div class="sc-label">Saldo LLO actual</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><div class="sc-icon blue mb-2"><i class="fas fa-credit-card"></i></div><div class="sc-val" style="font-size:1rem">Recarga Instantánea</div><div class="sc-label">Múltiples métodos</div></div></div>
+  </div>
+  <div class="row"><div class="col-lg-6"><div class="np-card"><div class="card-head"><h6><i class="fas fa-plus-circle me-2"></i>Recargar mi Billetera</h6></div>
+    <div class="card-body-c np-form">
+      <div id="tu-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Monto</label><input type="number" class="form-control" id="tu-amount" placeholder="50000" min="1000"></div>
+      <div class="form-group"><label class="form-label">Moneda</label><select class="form-select" id="tu-currency"><option value="COP">COP - Pesos Colombianos</option><option value="USD">USD - Dólares</option><option value="EUR">EUR - Euros</option></select></div>
+      <div class="form-group"><label class="form-label">Método de pago</label><select class="form-select" id="tu-method">
+        <option value="CARD">💳 Tarjeta Crédito/Débito</option>
+        <option value="BANK">🏦 Transferencia Bancaria</option>
+        <option value="CASH">💵 Depósito en Efectivo</option>
+        <option value="CRYPTO">₿ Criptomoneda</option>
+      </select></div>
+      <button class="btn-np w-100" onclick="doTopup()"><i class="fas fa-arrow-up me-2"></i>Recargar Saldo</button>
+    </div>
+  </div></div>
+  <div class="col-lg-6"><div class="np-card"><div class="card-head"><h6>Recargas Recientes</h6></div><div class="card-body-c p-0" id="tu-history"><div class="loading-c"><div class="spinner-np"></div></div></div></div></div>
+  </div>`;
+  loadTopupHistory();
+}
+async function doTopup(){
+  const data={amount:document.getElementById('tu-amount').value,currency:document.getElementById('tu-currency').value,method:document.getElementById('tu-method').value};
+  const r=await ApiG.post('/wallet/topup/',data);
+  if(r.ok){toast('Recarga exitosa! +'+fmtCOP(data.amount));await refreshW();navigate('topup')}
+  else{showAlert('tu-alert',r.data.detail||Object.values(r.data).flat().join('. ')||'Error')}
+}
+async function loadTopupHistory(){
+  const r=await ApiG.get('/wallet/topup/');const el=document.getElementById('tu-history');if(!el)return;
+  const list=r.data?.results||r.data||[];
+  if(list.length>0){
+    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+list.slice(0,10).map(t=>`<tr><td style="font-weight:600;color:var(--np-success)">+${fmtCOP(t.amount)}</td><td>${t.method_display}</td><td><span class="badge-s badge-${t.status==='COMPLETED'?'green':'yellow'}">${t.status}</span></td><td>${fmtDate(t.created_at)}</td></tr>`).join('')+'</tbody></table></div>';
+  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin recargas aún</p></div>'}
+}
+
+// ===== QR PAYMENTS =====
+async function pgQR(c){
+  c.innerHTML=`
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="stat-card" style="cursor:pointer;text-align:center;padding:32px" onclick="navigate('qr-create')">
+      <div class="sc-icon gold mb-2 mx-auto"><i class="fas fa-qrcode"></i></div>
+      <div style="font-weight:700;font-size:1.1rem;margin-top:12px">Generar QR para Cobrar</div>
+      <div class="sc-label">Crea un código QR y comparte para recibir pagos</div>
+    </div></div>
+    <div class="col-md-6"><div class="stat-card" style="cursor:pointer;text-align:center;padding:32px" onclick="navigate('qr-pay')">
+      <div class="sc-icon blue mb-2 mx-auto"><i class="fas fa-camera"></i></div>
+      <div style="font-weight:700;font-size:1.1rem;margin-top:12px">Escanear QR para Pagar</div>
+      <div class="sc-label">Ingresa el código QR para realizar un pago</div>
+    </div></div>
+  </div>
+  <div class="np-card"><div class="card-head"><h6>Mis Pagos QR</h6></div><div class="card-body-c p-0" id="qr-list"><div class="loading-c"><div class="spinner-np"></div></div></div></div>`;
+  const r=await ApiG.get('/qr/list/');const el=document.getElementById('qr-list');
+  const list=r.data?.results||r.data||[];
+  if(list.length>0){
+    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Código</th><th>Tipo</th><th>Monto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+list.map(q=>{const isReceiver=q.receiver===U?.id;return`<tr><td style="font-family:monospace;font-weight:600">${q.code}</td><td><span class="badge-s ${isReceiver?'badge-green':'badge-blue'}">${isReceiver?'Cobro':'Pago'}</span></td><td>${q.amount?fmtCOP(q.amount):'<em>Abierto</em>'}</td><td><span class="badge-s badge-${q.status==='PAID'?'green':q.status==='PENDING'?'yellow':'red'}">${q.status}</span></td><td>${fmtDate(q.created_at)}</td></tr>`}).join('')+'</tbody></table></div>';
+  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-qrcode"></i><p>Sin códigos QR aún</p></div>'}
+}
+
+function pgQRCreate(c){
+  c.innerHTML=`<p><a href="#" onclick="navigate('qr')" style="color:var(--np-primary-light);font-size:.9rem"><i class="fas fa-arrow-left me-1"></i>Volver</a></p>
+  <div class="row"><div class="col-lg-6"><div class="np-card"><div class="card-head"><h6>Generar Código QR</h6></div>
+    <div class="card-body-c np-form">
+      <div id="qrc-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Monto (opcional)</label><input type="number" class="form-control" id="qrc-amount" placeholder="Dejar vacío para monto abierto"></div>
+      <div class="form-group"><label class="form-label">Moneda</label><select class="form-select" id="qrc-currency"><option value="COP">COP</option><option value="LLO">LLO</option><option value="USD">USD</option></select></div>
+      <div class="form-group"><label class="form-label">Descripción</label><input type="text" class="form-control" id="qrc-desc" placeholder="Concepto del cobro"></div>
+      <button class="btn-np w-100" onclick="doCreateQR()"><i class="fas fa-qrcode me-2"></i>Generar QR</button>
+    </div>
+  </div></div>
+  <div class="col-lg-6"><div class="np-card hidden" id="qr-result"><div class="card-head"><h6>Tu Código QR</h6></div>
+    <div class="card-body-c" style="text-align:center"><div id="qr-display"></div></div>
+  </div></div></div>`;
+}
+async function doCreateQR(){
+  const data={};
+  const a=document.getElementById('qrc-amount').value;if(a)data.amount=a;
+  data.currency=document.getElementById('qrc-currency').value;
+  const d=document.getElementById('qrc-desc').value;if(d)data.description=d;
+  const r=await ApiG.post('/qr/',data);
+  if(r.ok){
+    const qr=r.data;
+    document.getElementById('qr-result').classList.remove('hidden');
+    document.getElementById('qr-display').innerHTML=`
+      <div style="background:#f8fafc;padding:32px;border-radius:12px;margin:16px 0">
+        <div style="font-size:6rem;color:var(--np-dark);font-family:monospace">📱</div>
+        <div style="font-family:monospace;font-size:1.4rem;font-weight:700;margin-top:16px;letter-spacing:2px">${qr.code}</div>
+      </div>
+      <p style="color:var(--np-gray);font-size:.85rem">Comparte este código para recibir el pago</p>
+      <div style="background:#f0fdf4;padding:12px;border-radius:10px;margin-top:12px">
+        <div style="font-weight:600">${qr.amount?fmtCOP(qr.amount):'Monto abierto'}</div>
+        <div style="font-size:.8rem;color:var(--np-gray)">${qr.currency} ${qr.description||''}</div>
+      </div>`;
+  }else{showAlert('qrc-alert',r.data.detail||'Error')}
+}
+
+function pgQRPay(c){
+  c.innerHTML=`<p><a href="#" onclick="navigate('qr')" style="color:var(--np-primary-light);font-size:.9rem"><i class="fas fa-arrow-left me-1"></i>Volver</a></p>
+  <div class="row"><div class="col-lg-6"><div class="np-card"><div class="card-head"><h6>Pagar Código QR</h6></div>
+    <div class="card-body-c np-form">
+      <div id="qrp-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Código QR</label><input type="text" class="form-control" id="qrp-code" placeholder="QR-XXXXXXXXXXXX" style="font-family:monospace;letter-spacing:2px"></div>
+      <button class="btn-np-outline w-100" onclick="checkQR()"><i class="fas fa-search me-2"></i>Buscar QR</button>
+    </div>
+  </div></div>
+  <div class="col-lg-6"><div class="np-card hidden" id="qr-detail"><div class="card-head"><h6>Confirmar Pago</h6></div>
+    <div class="card-body-c" id="qr-detail-body"></div>
+  </div></div></div>`;
+}
+async function checkQR(){
+  const code=document.getElementById('qrp-code').value.trim().toUpperCase();
+  const r=await ApiG.get('/qr/'+code+'/');
+  if(r.ok){
+    const qr=r.data;
+    document.getElementById('qr-detail').classList.remove('hidden');
+    document.getElementById('qr-detail-body').innerHTML=`
+      <div style="text-align:center;padding:16px">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--np-primary-50);display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--np-primary-light)"><i class="fas fa-store"></i></div>
+        <div style="font-weight:700;margin-top:12px">Cobro de SuperNova</div>
+        <div style="color:var(--np-gray);font-size:.85rem">${qr.description||'Sin descripción'}</div>
+        <div style="font-size:1.8rem;font-weight:800;margin:16px 0;color:var(--np-primary)">${qr.amount?fmtCOP(qr.amount):'Monto abierto'}</div>
+      </div>
+      ${!qr.amount?'<div class="form-group np-form"><label class="form-label">Ingresa el monto a pagar</label><input type="number" class="form-control" id="qrp-amount" placeholder="0"></div>':''}
+      <button class="btn-np w-100" onclick="payQR('${qr.code}',${qr.amount?'null':'true'})"><i class="fas fa-check me-2"></i>Confirmar Pago</button>`;
+  }else{showAlert('qrp-alert','Código no encontrado o expirado')}
+}
+async function payQR(code,needAmount){
+  const data={};
+  if(needAmount)data.amount=document.getElementById('qrp-amount').value;
+  const r=await ApiG.post('/qr/'+code+'/pay/',data);
+  if(r.ok){toast('Pago exitoso!');await refreshW();navigate('qr')}
+  else{showAlert('qrp-alert',r.data.detail||'Error al pagar')}
+}
+
+// ===== MOBILE TOPUP =====
+async function pgMobileTopup(c){
+  c.innerHTML=`
+  <div class="row"><div class="col-lg-6"><div class="np-card"><div class="card-head"><h6><i class="fas fa-mobile-alt me-2"></i>Recargar Celular</h6></div>
+    <div class="card-body-c np-form">
+      <div id="mt-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Número de celular</label><input type="tel" class="form-control" id="mt-phone" placeholder="3001234567"></div>
+      <div class="form-group"><label class="form-label">Operador</label><select class="form-select" id="mt-operator">
+        <option value="Claro">Claro</option><option value="Movistar">Movistar</option><option value="Tigo">Tigo</option><option value="WOM">WOM</option><option value="Virgin">Virgin Mobile</option><option value="Otro">Otro</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Monto a recargar</label>
+        <div class="row g-2 mb-2">
+          <div class="col-3"><button class="btn-np-outline w-100 btn-np-sm" onclick="document.getElementById('mt-amount').value=5000">$5,000</button></div>
+          <div class="col-3"><button class="btn-np-outline w-100 btn-np-sm" onclick="document.getElementById('mt-amount').value=10000">$10K</button></div>
+          <div class="col-3"><button class="btn-np-outline w-100 btn-np-sm" onclick="document.getElementById('mt-amount').value=20000">$20K</button></div>
+          <div class="col-3"><button class="btn-np-outline w-100 btn-np-sm" onclick="document.getElementById('mt-amount').value=50000">$50K</button></div>
+        </div>
+        <input type="number" class="form-control" id="mt-amount" placeholder="0" min="1000">
+      </div>
+      <button class="btn-np w-100" onclick="doMobileTopup()"><i class="fas fa-mobile-alt me-2"></i>Recargar</button>
+    </div>
+  </div></div>
+  <div class="col-lg-6"><div class="np-card"><div class="card-head"><h6>Recargas Recientes</h6></div><div class="card-body-c p-0" id="mt-history"><div class="loading-c"><div class="spinner-np"></div></div></div></div></div>
+  </div>`;
+  loadMobileHistory();
+}
+async function doMobileTopup(){
+  const data={phone_number:document.getElementById('mt-phone').value,operator:document.getElementById('mt-operator').value,amount:document.getElementById('mt-amount').value,currency:'COP',country_code:'CO'};
+  const r=await ApiG.post('/mobile-topup/',data);
+  if(r.ok){toast('Recarga enviada al '+data.phone_number);await refreshW();navigate('mobile-topup')}
+  else{showAlert('mt-alert',r.data.detail||'Error')}
+}
+async function loadMobileHistory(){
+  const r=await ApiG.get('/mobile-topup/');const el=document.getElementById('mt-history');
+  const list=r.data?.results||r.data||[];
+  if(list.length>0){
+    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Número</th><th>Operador</th><th>Monto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+list.slice(0,15).map(t=>`<tr><td style="font-weight:600">${t.phone_number}</td><td>${t.operator}</td><td>${fmtCOP(t.amount)}</td><td><span class="badge-s badge-${t.status==='COMPLETED'?'green':'yellow'}">${t.status}</span></td><td>${fmtDate(t.created_at)}</td></tr>`).join('')+'</tbody></table></div>';
+  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-mobile-alt"></i><p>Sin recargas aún</p></div>'}
+}
+
+// ===== BILLS =====
+async function pgBills(c){
+  c.innerHTML=`
+  <div class="row"><div class="col-lg-6"><div class="np-card"><div class="card-head"><h6><i class="fas fa-file-invoice me-2"></i>Pagar Servicio</h6></div>
+    <div class="card-body-c np-form">
+      <div id="b-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Tipo de servicio</label><select class="form-select" id="b-cat">
+        <option value="ELECTRICITY">⚡ Electricidad</option>
+        <option value="WATER">💧 Agua</option>
+        <option value="GAS">🔥 Gas</option>
+        <option value="INTERNET">🌐 Internet</option>
+        <option value="TV">📺 TV / Streaming</option>
+        <option value="PHONE">📞 Teléfono fijo</option>
+        <option value="TAXES">🏛️ Impuestos</option>
+        <option value="EDUCATION">🎓 Educación</option>
+        <option value="INSURANCE">🛡️ Seguros</option>
+        <option value="OTHER">📋 Otro</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Empresa</label><input type="text" class="form-control" id="b-company" placeholder="Nombre de la empresa"></div>
+      <div class="form-group"><label class="form-label">Número de cuenta/contrato</label><input type="text" class="form-control" id="b-account" placeholder="12345678"></div>
+      <div class="form-group"><label class="form-label">Monto a pagar</label><input type="number" class="form-control" id="b-amount" placeholder="0"></div>
+      <button class="btn-np w-100" onclick="doBillPay()"><i class="fas fa-check me-2"></i>Pagar Servicio</button>
+    </div>
+  </div></div>
+  <div class="col-lg-6"><div class="np-card"><div class="card-head"><h6>Pagos Recientes</h6></div><div class="card-body-c p-0" id="b-history"><div class="loading-c"><div class="spinner-np"></div></div></div></div></div>
+  </div>`;
+  loadBillHistory();
+}
+async function doBillPay(){
+  const data={category:document.getElementById('b-cat').value,company:document.getElementById('b-company').value,account_number:document.getElementById('b-account').value,amount:document.getElementById('b-amount').value,currency:'COP'};
+  const r=await ApiG.post('/bills/',data);
+  if(r.ok){toast('Pago realizado!');await refreshW();navigate('bills')}
+  else{showAlert('b-alert',r.data.detail||'Error')}
+}
+async function loadBillHistory(){
+  const r=await ApiG.get('/bills/');const el=document.getElementById('b-history');
+  const list=r.data?.results||r.data||[];
+  if(list.length>0){
+    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Servicio</th><th>Empresa</th><th>Monto</th><th>Estado</th></tr></thead><tbody>'+list.slice(0,15).map(b=>`<tr><td>${b.category_display}</td><td style="font-weight:600">${b.company}</td><td>${fmtCOP(b.amount)}</td><td><span class="badge-s badge-green">${b.status}</span></td></tr>`).join('')+'</tbody></table></div>';
+  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-file-invoice"></i><p>Sin pagos aún</p></div>'}
+}
+
+// ===== CARDS =====
+async function pgCards(c){
+  c.innerHTML=`
+  <div class="mb-3"><button class="btn-np" onclick="newCard()"><i class="fas fa-plus me-2"></i>Crear Tarjeta Virtual</button></div>
+  <div id="cards-list" class="row g-3"><div class="col-12"><div class="loading-c"><div class="spinner-np"></div></div></div></div>`;
+  const r=await ApiG.get('/cards/');const el=document.getElementById('cards-list');
+  const list=r.data?.results||r.data||[];
+  if(list.length>0){
+    el.innerHTML=list.map(card=>`
+      <div class="col-md-6 col-lg-4">
+        <div style="background:linear-gradient(135deg,#1a6b21,#388E3C);color:#fff;border-radius:16px;padding:24px;position:relative;overflow:hidden;box-shadow:var(--np-shadow-lg)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div style="font-size:1.2rem;font-weight:800">SuperNova</div>
+            <i class="fab fa-cc-visa" style="font-size:2rem;opacity:.9"></i>
+          </div>
+          <div style="font-family:monospace;font-size:1.3rem;letter-spacing:2px;margin-bottom:20px">${card.masked_number}</div>
+          <div style="display:flex;justify-content:space-between;font-size:.75rem">
+            <div><div style="opacity:.7;font-size:.65rem">TITULAR</div><div style="font-weight:600">${card.card_holder_name}</div></div>
+            <div><div style="opacity:.7;font-size:.65rem">EXPIRA</div><div style="font-weight:600">${String(card.expiry_month).padStart(2,'0')}/${String(card.expiry_year).slice(-2)}</div></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <span class="badge-s badge-${card.status==='ACTIVE'?'green':'yellow'}" style="font-size:.65rem">${card.status}</span>
+            <span class="badge-s badge-blue" style="font-size:.65rem">${card.currency}</span>
+          </div>
+        </div>
+        <div class="mt-2 d-flex gap-2">
+          ${card.status==='ACTIVE'?`<button class="btn-np-outline btn-np-sm" onclick="freezeCard('${card.id}')">Congelar</button>`:`<button class="btn-np-outline btn-np-sm" onclick="unfreezeCard('${card.id}')">Activar</button>`}
+          <button class="btn-np-outline btn-np-sm" style="border-color:var(--np-danger);color:var(--np-danger)" onclick="cancelCard('${card.id}')">Cancelar</button>
+        </div>
+      </div>
+    `).join('');
+  }else{el.innerHTML='<div class="col-12"><div class="empty-state"><i class="far fa-credit-card"></i><p>No tienes tarjetas. Crea tu primera tarjeta virtual!</p></div></div>'}
+}
+async function newCard(){const r=await ApiG.post('/cards/',{currency:'USD',spending_limit:1000});if(r.ok){toast('Tarjeta creada!');navigate('cards')}else{toast('Error: '+(r.data.detail||''))}}
+async function freezeCard(id){await ApiG.post('/cards/'+id+'/freeze/');toast('Tarjeta congelada');navigate('cards')}
+async function unfreezeCard(id){await ApiG.post('/cards/'+id+'/unfreeze/');toast('Tarjeta activada');navigate('cards')}
+async function cancelCard(id){if(confirm('Cancelar tarjeta permanentemente?')){await ApiG.post('/cards/'+id+'/cancel/');toast('Tarjeta cancelada');navigate('cards')}}
+
+// ===== REWARDS =====
+async function pgRewards(c){
+  c.innerHTML='<div class="loading-c"><div class="spinner-np"></div></div>';
+  const[rp,hist]=await Promise.all([ApiG.get('/rewards/'),ApiG.get('/rewards/history/')]);
+  const r=rp.ok?rp.data:{balance:0,lifetime_earned:0,lifetime_redeemed:0,tier:'BRONZE'};
+  const tierColors={BRONZE:'#cd7f32',SILVER:'#c0c0c0',GOLD:'#ffd700',PLATINUM:'#e5e4e2'};
+  c.innerHTML=`
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="stat-card" style="text-align:center"><div style="font-size:3rem;color:${tierColors[r.tier]};margin-bottom:8px"><i class="fas fa-trophy"></i></div><div class="sc-val">${r.tier}</div><div class="sc-label">Tier actual</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><div class="sc-icon gold mb-2"><i class="fas fa-gift"></i></div><div class="sc-val">${r.balance.toLocaleString()}</div><div class="sc-label">Puntos disponibles</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><div class="sc-icon green mb-2"><i class="fas fa-arrow-up"></i></div><div class="sc-val">${r.lifetime_earned.toLocaleString()}</div><div class="sc-label">Total ganado</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><div class="sc-icon blue mb-2"><i class="fas fa-arrow-down"></i></div><div class="sc-val">${r.lifetime_redeemed.toLocaleString()}</div><div class="sc-label">Total canjeado</div></div></div>
+  </div>
+  <div class="row"><div class="col-lg-5"><div class="np-card"><div class="card-head"><h6>Canjear Puntos</h6></div>
+    <div class="card-body-c np-form">
+      <p style="color:var(--np-gray);font-size:.85rem;margin-bottom:16px">Cada 100 puntos = $1,000 COP</p>
+      <div id="rd-alert" class="alert-np hidden"></div>
+      <div class="form-group"><label class="form-label">Puntos a canjear</label><input type="number" class="form-control" id="rd-pts" min="100" step="100" placeholder="100"></div>
+      <button class="btn-np-gold w-100" onclick="redeemPts()"><i class="fas fa-exchange-alt me-2"></i>Canjear por COP</button>
+    </div>
+  </div></div>
+  <div class="col-lg-7"><div class="np-card"><div class="card-head"><h6>Historial de Puntos</h6></div><div class="card-body-c p-0">
+    ${(hist.data?.results||[]).length>0?'<div class="table-responsive"><table class="np-table"><thead><tr><th>Tipo</th><th>Puntos</th><th>Razón</th><th>Fecha</th></tr></thead><tbody>'+(hist.data.results||[]).slice(0,15).map(t=>`<tr><td><span class="badge-s ${t.points>0?'badge-green':'badge-red'}">${t.transaction_type}</span></td><td style="font-weight:600;color:${t.points>0?'var(--np-success)':'var(--np-danger)'}">${t.points>0?'+':''}${t.points}</td><td>${t.reason||'-'}</td><td>${fmtDate(t.created_at)}</td></tr>`).join('')+'</tbody></table></div>':'<div class="empty-state"><i class="fas fa-gift"></i><p>Sin puntos aún</p></div>'}
+  </div></div></div>
+  </div>`;
+}
+async function redeemPts(){const pts=document.getElementById('rd-pts').value;const r=await ApiG.post('/rewards/redeem/',{points:pts});if(r.ok){toast(r.data.message);await refreshW();navigate('rewards')}else{showAlert('rd-alert',r.data.detail||'Error')}}
+
+// ===== REFERRALS =====
+async function pgReferrals(c){
+  c.innerHTML='<div class="loading-c"><div class="spinner-np"></div></div>';
+  const[code,list]=await Promise.all([ApiG.get('/referral/code/'),ApiG.get('/referral/list/')]);
+  const rc=code.ok?code.data:{};
+  const refs=list.ok?(list.data?.results||list.data||[]):[];
+  c.innerHTML=`
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="stat-card" style="text-align:center;background:linear-gradient(135deg,var(--np-primary),var(--np-primary-light));color:#fff">
+      <i class="fas fa-user-friends" style="font-size:2.5rem;margin-bottom:12px"></i>
+      <div style="font-size:.85rem;opacity:.9">Tu código de referido</div>
+      <div style="font-size:2.2rem;font-weight:800;letter-spacing:4px;margin:8px 0">${rc.code||'------'}</div>
+      <button class="btn-np-gold btn-np-sm" onclick="navigator.clipboard.writeText('${rc.code||''}');toast('Código copiado!')"><i class="fas fa-copy me-1"></i>Copiar</button>
+    </div></div>
+    <div class="col-md-3"><div class="stat-card"><div class="sc-icon green mb-2"><i class="fas fa-users"></i></div><div class="sc-val">${rc.total_referrals||0}</div><div class="sc-label">Personas referidas</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><div class="sc-icon gold mb-2"><i class="fas fa-coins"></i></div><div class="sc-val">${fmtCOP(rc.total_earned||0)}</div><div class="sc-label">Total ganado</div></div></div>
+  </div>
+  <div class="np-card"><div class="card-head"><h6>Cómo funciona</h6></div><div class="card-body-c">
+    <div class="row text-center">
+      <div class="col-md-4"><div style="font-size:2.5rem;color:var(--np-primary-light)"><i class="fas fa-share-alt"></i></div><div style="font-weight:600;margin-top:8px">1. Comparte tu código</div><div style="font-size:.8rem;color:var(--np-gray)">Envíalo a tus amigos</div></div>
+      <div class="col-md-4"><div style="font-size:2.5rem;color:var(--np-accent)"><i class="fas fa-user-plus"></i></div><div style="font-weight:600;margin-top:8px">2. Tu amigo se registra</div><div style="font-size:.8rem;color:var(--np-gray)">Y usa tu código</div></div>
+      <div class="col-md-4"><div style="font-size:2.5rem;color:var(--np-success)"><i class="fas fa-gift"></i></div><div style="font-weight:600;margin-top:8px">3. Ambos ganan</div><div style="font-size:.8rem;color:var(--np-gray)">$5,000 COP cada uno</div></div>
+    </div>
+  </div></div>
+  <div class="np-card"><div class="card-head"><h6>Mis Referidos</h6></div><div class="card-body-c p-0">
+    ${refs.length>0?'<div class="table-responsive"><table class="np-table"><thead><tr><th>Persona</th><th>Bono</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+refs.map(r=>`<tr><td>${r.referred_name}</td><td style="font-weight:600;color:var(--np-success)">${fmtCOP(r.bonus_amount)}</td><td><span class="badge-s badge-${r.bonus_paid?'green':'yellow'}">${r.bonus_paid?'Pagado':'Pendiente'}</span></td><td>${fmtDate(r.created_at)}</td></tr>`).join('')+'</tbody></table></div>':'<div class="empty-state"><i class="fas fa-user-friends"></i><p>Aún no has referido a nadie. Comparte tu código!</p></div>'}
+  </div></div>`;
+}
 
 // ===== BOOT =====
 (async()=>{if(S.get()){await loadApp()}else{document.getElementById('auth-view').classList.remove('hidden')}})();

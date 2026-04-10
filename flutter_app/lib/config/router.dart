@@ -25,6 +25,7 @@ import '../screens/microcredit/microcredit_screen.dart';
 import '../screens/microcredit/microcredit_request_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/profile/kyc_screen.dart';
+import '../screens/global/global_features_screen.dart';
 
 /// Application router configuration.
 class AppRouter {
@@ -182,6 +183,36 @@ class AppRouter {
         path: '/profile/kyc',
         name: 'profile-kyc',
         builder: (context, state) => const KYCScreen(),
+      ),
+
+      // ── Global Features ─────────────────────
+      GoRoute(
+        path: '/topup',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'topup'),
+      ),
+      GoRoute(
+        path: '/qr',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'qr'),
+      ),
+      GoRoute(
+        path: '/mobile-topup',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'mobile-topup'),
+      ),
+      GoRoute(
+        path: '/bills',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'bills'),
+      ),
+      GoRoute(
+        path: '/cards',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'cards'),
+      ),
+      GoRoute(
+        path: '/rewards',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'rewards'),
+      ),
+      GoRoute(
+        path: '/referrals',
+        builder: (context, state) => const GlobalFeatureScreen(feature: 'referrals'),
       ),
     ],
   );

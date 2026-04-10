@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.microcredit',
     'apps.notifications',
     'apps.web_dashboard',
+    'apps.global_features',
 ]
 
 MIDDLEWARE = [

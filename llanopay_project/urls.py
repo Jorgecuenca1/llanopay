@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/v1/marketplace/', include('apps.marketplace.urls')),
     path('api/v1/microcredit/', include('apps.microcredit.urls')),
     path('api/v1/notifications/', include('apps.notifications.urls')),
+    path('api/v1/global/', include('apps.global_features.urls')),
     # Web Dashboard
     path('dashboard/', include('apps.web_dashboard.urls')),
     # User-facing Web Platform (SPA)
