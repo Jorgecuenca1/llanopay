@@ -23,7 +23,7 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: 'nova.corpofuturo.org -> http://backend:8005'
+      DOMAINS: 'nova.jorgecuenca.com -> http://backend:8005'
       STAGE: 'production'
       CLIENT_MAX_BODY_SIZE: 100M
       PROXY_READ_TIMEOUT: '600'
