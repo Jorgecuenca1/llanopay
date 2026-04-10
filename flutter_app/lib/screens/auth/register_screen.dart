@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/// Registration screen for new LlanoPay users.
+import '../../services/api_service.dart';
+import '../../config/api_config.dart';
+
+/// Registration screen for new SuperNova users.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -58,15 +62,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO: Integrate with AuthService.register
-    await Future.delayed(const Duration(seconds: 1));
+    // Auto-format phone with +57 prefix
+    var phone = _phoneController.text.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    if (phone.startsWith('3') && phone.length == 10) phone = '+57$phone';
+    if (!phone.startsWith('+')) phone = '+$phone';
+
+    final api = context.read<ApiService>();
+    final response = await api.post(ApiConfig.authRegister, data: {
+      'phone_number': phone,
+      'first_name': _firstNameController.text.trim(),
+      'last_name': _lastNameController.text.trim(),
+      'document_type': _documentType,
+      'document_number': _documentController.text.trim(),
+      'password': _passwordController.text,
+    });
 
     if (!mounted) return;
     setState(() => _isLoading = false);
-    context.push('/verify-otp', extra: {
-      'phone': _phoneController.text.trim(),
-      'purpose': 'registration',
-    });
+
+    if (response.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cuenta creada! Verifica tu telefono.')),
+      );
+      context.push('/verify-otp', extra: {
+        'phone': phone,
+        'purpose': 'REGISTER',
+      });
+    } else {
+      final msg = response.errors?.values.first?.toString() ??
+          response.message ??
+          'Error al registrar';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   @override

@@ -1,8 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+
+import '../../services/api_service.dart';
+import '../../services/storage_service.dart';
+import '../../config/api_config.dart';
 
 /// OTP verification screen.
 class VerifyOTPScreen extends StatefulWidget {
@@ -59,28 +64,64 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     if (code.length < 6) return;
     setState(() => _isLoading = true);
 
-    // TODO: Integrate with AuthService.verifyOTP
-    await Future.delayed(const Duration(seconds: 1));
+    final api = context.read<ApiService>();
+    final purpose = widget.purpose.toUpperCase().contains('REGIST') ? 'REGISTER' : widget.purpose.toUpperCase();
+    final response = await api.post(ApiConfig.authVerifyOTP, data: {
+      'phone_number': widget.phone,
+      'code': code,
+      'purpose': purpose,
+    });
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (widget.purpose == 'registration') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Cuenta verificada exitosamente'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
-      );
-      context.go('/login');
+    if (response.success && response.data != null) {
+      final data = response.data as Map<String, dynamic>;
+      final access = data['access'] as String?;
+      final refresh = data['refresh'] as String?;
+      // Auto-login if tokens returned
+      if (access != null) {
+        final storage = context.read<StorageService>();
+        await storage.saveToken(access);
+        if (refresh != null) await storage.saveRefreshToken(refresh);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cuenta verificada!')),
+          );
+          context.go('/home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Verificado! Inicia sesion.')),
+          );
+          context.go('/login');
+        }
+      }
     } else {
-      context.pop(true);
+      final msg = response.errors?['code']?.toString() ??
+          response.errors?.values.first?.toString() ??
+          response.message ??
+          'Codigo invalido';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: Theme.of(context).colorScheme.error),
+      );
     }
   }
 
-  void _resendOTP() {
-    // TODO: Integrate with AuthService.requestOTP
-    _startCountdown();
+  void _resendOTP() async {
+    final api = context.read<ApiService>();
+    final purpose = widget.purpose.toUpperCase().contains('REGIST') ? 'REGISTER' : widget.purpose.toUpperCase();
+    await api.post(ApiConfig.authRequestOTP, data: {
+      'phone_number': widget.phone,
+      'purpose': purpose,
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Codigo reenviado')),
+      );
+      _startCountdown();
+    }
   }
 
   @override

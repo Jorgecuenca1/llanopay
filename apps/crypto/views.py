@@ -32,6 +32,7 @@ class CryptoDepositView(APIView):
     POST: Registrar un deposito crypto con tx_hash.
     Lanza la verificacion asincrona on-chain.
     """
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = CryptoDepositSerializer(data=request.data)
@@ -62,6 +63,7 @@ class CryptoDepositListView(generics.ListAPIView):
     """GET: Listar depositos crypto del usuario autenticado."""
 
     serializer_class = CryptoDepositDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return CryptoDeposit.objects.filter(user=self.request.user)
@@ -69,6 +71,7 @@ class CryptoDepositListView(generics.ListAPIView):
 
 class CryptoWithdrawalView(APIView):
     """POST: Solicitar un retiro de criptomonedas."""
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = CryptoWithdrawalSerializer(data=request.data)
@@ -85,15 +88,15 @@ class CryptoWithdrawalView(APIView):
         with transaction.atomic():
             # Verificar saldo COP suficiente
             wallet = request.user.wallet
-            if wallet.balance < cop_amount:
+            if wallet.balance_cop < cop_amount:
                 return Response(
                     {'detail': 'Saldo COP insuficiente para este retiro.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             # Descontar del saldo
-            wallet.balance -= cop_amount
-            wallet.save(update_fields=['balance'])
+            wallet.balance_cop -= cop_amount
+            wallet.save(update_fields=['balance_cop', 'updated_at'])
 
             withdrawal = CryptoWithdrawal.objects.create(
                 user=request.user,
@@ -121,6 +124,7 @@ class ExchangeRateListView(generics.ListAPIView):
 
 class LlanocoinBuyView(APIView):
     """POST: Comprar Llanocoin con saldo COP de la billetera."""
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = LlanocoinBuySerializer(data=request.data)
@@ -132,15 +136,16 @@ class LlanocoinBuyView(APIView):
 
         with transaction.atomic():
             wallet = request.user.wallet
-            if wallet.balance < amount_cop:
+            if wallet.balance_cop < amount_cop:
                 return Response(
                     {'detail': 'Saldo COP insuficiente.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Descontar COP
-            wallet.balance -= amount_cop
-            wallet.save(update_fields=['balance'])
+            # Descontar COP, acreditar LLO
+            wallet.balance_cop -= amount_cop
+            wallet.balance_llo += amount_llo
+            wallet.save(update_fields=['balance_cop', 'balance_llo', 'updated_at'])
 
             # Crear transaccion LLO
             llo_tx = LlanocoinTransaction.objects.create(
@@ -158,6 +163,7 @@ class LlanocoinBuyView(APIView):
 
 class LlanocoinSellView(APIView):
     """POST: Vender Llanocoin y recibir COP en la billetera."""
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = LlanocoinSellSerializer(data=request.data)
@@ -168,42 +174,17 @@ class LlanocoinSellView(APIView):
         amount_cop = amount_llo * rate
 
         with transaction.atomic():
-            # Verificar que el usuario tiene suficiente LLO
-            # Calculamos el balance LLO del usuario a partir de transacciones
-            from django.db.models import Sum, Q
-
-            llo_in = LlanocoinTransaction.objects.filter(
-                user=request.user,
-                status=LlanocoinTransaction.Status.COMPLETED,
-                transaction_type__in=[
-                    LlanocoinTransaction.TransactionType.BUY,
-                    LlanocoinTransaction.TransactionType.TRANSFER_IN,
-                    LlanocoinTransaction.TransactionType.REWARD,
-                ],
-            ).aggregate(total=Sum('amount_llo'))['total'] or Decimal('0')
-
-            llo_out = LlanocoinTransaction.objects.filter(
-                user=request.user,
-                status=LlanocoinTransaction.Status.COMPLETED,
-                transaction_type__in=[
-                    LlanocoinTransaction.TransactionType.SELL,
-                    LlanocoinTransaction.TransactionType.TRANSFER_OUT,
-                    LlanocoinTransaction.TransactionType.STAKE,
-                ],
-            ).aggregate(total=Sum('amount_llo'))['total'] or Decimal('0')
-
-            llo_balance = llo_in - llo_out
-
-            if llo_balance < amount_llo:
+            wallet = request.user.wallet
+            if wallet.balance_llo < amount_llo:
                 return Response(
-                    {'detail': f'Saldo LLO insuficiente. Disponible: {llo_balance} LLO'},
+                    {'detail': f'Saldo LLO insuficiente. Disponible: {wallet.balance_llo} LLO'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Acreditar COP
-            wallet = request.user.wallet
-            wallet.balance += amount_cop
-            wallet.save(update_fields=['balance'])
+            # Descontar LLO, acreditar COP
+            wallet.balance_llo -= amount_llo
+            wallet.balance_cop += amount_cop
+            wallet.save(update_fields=['balance_cop', 'balance_llo', 'updated_at'])
 
             # Crear transaccion LLO
             llo_tx = LlanocoinTransaction.objects.create(
@@ -223,6 +204,7 @@ class LlanocoinTransactionListView(generics.ListAPIView):
     """GET: Listar transacciones Llanocoin del usuario autenticado."""
 
     serializer_class = LlanocoinTransactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return LlanocoinTransaction.objects.filter(user=self.request.user)

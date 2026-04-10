@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
+import '../../config/api_config.dart';
 
 /// Llanocoin (LLO) management screen: buy, sell, view balance and history.
 class LlanocoinScreen extends StatefulWidget {
@@ -25,13 +28,83 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
     decimalDigits: 0,
   );
 
-  static const double _exchangeRate = 1000; // 1 LLO = 1,000 COP
-  static const double _currentLloBalance = 0;
+  double _exchangeRate = 1000; // Will be loaded from API
+  double _currentLloBalance = 0;
+  bool _processing = false;
+  List<dynamic> _history = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+  }
+
+  Future<void> _loadData() async {
+    final api = context.read<ApiService>();
+    final results = await Future.wait([
+      api.get(ApiConfig.walletBalance),
+      api.get('/crypto/llanocoin/transactions/'),
+    ]);
+    if (mounted) {
+      setState(() {
+        if (results[0].success) {
+          final w = results[0].data as Map<String, dynamic>;
+          _currentLloBalance = double.tryParse(w['balance_llo']?.toString() ?? '0') ?? 0;
+          final llo = double.tryParse(w['llo_cop_equivalent']?.toString() ?? '0') ?? 0;
+          if (_currentLloBalance > 0) _exchangeRate = llo / _currentLloBalance;
+        }
+        if (results[1].success) {
+          final d = results[1].data;
+          if (d is Map) _history = d['results'] as List? ?? [];
+          else if (d is List) _history = d;
+        }
+      });
+    }
+  }
+
+  Future<void> _doBuy() async {
+    setState(() => _processing = true);
+    final api = context.read<ApiService>();
+    final r = await api.post('/crypto/llanocoin/buy/', data: {
+      'amount_cop': _buyAmountController.text.replaceAll(RegExp(r'[^0-9.]'), ''),
+    });
+    if (mounted) {
+      setState(() => _processing = false);
+      if (r.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compra exitosa!')),
+        );
+        _buyAmountController.clear();
+        _loadData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(r.message ?? 'Error en la compra')),
+        );
+      }
+    }
+  }
+
+  Future<void> _doSell() async {
+    setState(() => _processing = true);
+    final api = context.read<ApiService>();
+    final r = await api.post('/crypto/llanocoin/sell/', data: {
+      'amount_llo': _sellAmountController.text.replaceAll(RegExp(r'[^0-9.]'), ''),
+    });
+    if (mounted) {
+      setState(() => _processing = false);
+      if (r.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Venta exitosa!')),
+        );
+        _sellAmountController.clear();
+        _loadData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(r.message ?? 'Error en la venta')),
+        );
+      }
+    }
   }
 
   @override
@@ -248,18 +321,11 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
           SizedBox(
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: _buyPreviewLlo > 0
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Compra de Llanocoin en proceso'),
-                          backgroundColor: LlanoPayTheme.success,
-                        ),
-                      );
-                    }
-                  : null,
-              icon: const Icon(Icons.shopping_cart),
-              label: const Text('Comprar LLO'),
+              onPressed: (_buyPreviewLlo > 0 && !_processing) ? _doBuy : null,
+              icon: _processing
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.shopping_cart),
+              label: Text(_processing ? 'Procesando...' : 'Comprar LLO'),
             ),
           ),
         ],
@@ -342,21 +408,14 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
           SizedBox(
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: _sellPreviewCop > 0
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Venta de Llanocoin en proceso'),
-                          backgroundColor: LlanoPayTheme.success,
-                        ),
-                      );
-                    }
-                  : null,
+              onPressed: (_sellPreviewCop > 0 && !_processing) ? _doSell : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: LlanoPayTheme.secondaryGoldDark,
               ),
-              icon: const Icon(Icons.sell_outlined),
-              label: const Text('Vender LLO'),
+              icon: _processing
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.sell_outlined),
+              label: Text(_processing ? 'Procesando...' : 'Vender LLO'),
             ),
           ),
         ],

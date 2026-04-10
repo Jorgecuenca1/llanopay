@@ -1,15 +1,61 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
+import '../../config/api_config.dart';
 
 /// Main microcredit overview: credit score gauge, max credit, active loans.
-class MicrocreditScreen extends StatelessWidget {
+class MicrocreditScreen extends StatefulWidget {
   const MicrocreditScreen({super.key});
+
+  @override
+  State<MicrocreditScreen> createState() => _MicrocreditScreenState();
+}
+
+class _MicrocreditScreenState extends State<MicrocreditScreen> {
+  bool _loading = true;
+  int _creditScore = 0;
+  double _maxCredit = 0;
+  int _activeLoanCount = 0;
+  int _totalLoans = 0;
+  List<dynamic> _loans = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final api = context.read<ApiService>();
+    final results = await Future.wait([
+      api.get(ApiConfig.microcreditProfile),
+      api.get(ApiConfig.microcreditLoans),
+    ]);
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        if (results[0].success) {
+          final p = results[0].data as Map<String, dynamic>;
+          _creditScore = (p['credit_score'] as num? ?? 0).toInt();
+          _maxCredit = double.tryParse(p['max_credit_amount']?.toString() ?? '0') ?? 0;
+          _activeLoanCount = (p['active_loans'] as num? ?? 0).toInt();
+          _totalLoans = (p['total_loans'] as num? ?? 0).toInt();
+        }
+        if (results[1].success) {
+          final d = results[1].data;
+          _loans = d is Map ? (d['results'] as List? ?? []) : (d as List? ?? []);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +65,9 @@ class MicrocreditScreen extends StatelessWidget {
       decimalDigits: 0,
     );
 
-    // Placeholder data
-    const int creditScore = 650;
-    const double maxCredit = 1500000;
-    final List<Map<String, dynamic>> activeLoans = [];
+    final int creditScore = _creditScore;
+    final double maxCredit = _maxCredit;
+    final activeLoans = _loans.where((l) => (l as Map)['status'] == 'ACTIVE' || l['status'] == 'DISBURSED').toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -32,8 +77,11 @@ class MicrocreditScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: _loading ? const Center(child: CircularProgressIndicator()) : RefreshIndicator(
+        onRefresh: _load,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -231,6 +279,7 @@ class MicrocreditScreen extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
