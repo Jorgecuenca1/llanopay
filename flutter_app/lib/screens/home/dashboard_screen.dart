@@ -191,7 +191,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'LlanoPay',
+                          'SuperNova',
                           style: GoogleFonts.montserrat(
                             color: Colors.white,
                             fontSize: 11,

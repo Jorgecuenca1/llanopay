@@ -191,7 +191,7 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # Spectacular (OpenAPI docs)
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'LlanoPay API',
+    'TITLE': 'SuperNova API',
     'DESCRIPTION': 'Billetera digital regional para los Llanos Orientales de Colombia',
     'VERSION': '1.0.0',
 }

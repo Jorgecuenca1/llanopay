@@ -47,7 +47,14 @@
       "Bash(git push:*)",
       "Bash(git -C /c/Users/HOME/PycharmProjects/llanopay rev-parse --show-toplevel)",
       "Bash(git init:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(/c/Users/HOME/flutter/bin/flutter doctor:*)",
+      "Bash(export JAVA_HOME=\"/c/Users/HOME/jdk-17.0.2\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(/c/Users/HOME/flutter/bin/flutter build:*)",
+      "Bash(/c/Users/HOME/flutter/bin/flutter create:*)"
     ]
   }
 }

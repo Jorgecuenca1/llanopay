@@ -180,6 +180,18 @@ class RequestOTPView(APIView):
         )
 
 
+class LogoutView(APIView):
+    """Logout endpoint - clears session server-side."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        return Response(
+            {'message': 'Sesion cerrada exitosamente.'},
+            status=status.HTTP_200_OK,
+        )
+
+
 class ChangePasswordView(APIView):
     """Change the authenticated user's password."""
 

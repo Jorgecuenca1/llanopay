@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 
 /// Profile tab showing user info and settings.
 class ProfileTab extends StatelessWidget {
@@ -9,7 +14,13 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is Unauthenticated) {
+          context.go('/login');
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(title: const Text('Mi Perfil')),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -28,7 +39,7 @@ class ProfileTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text('Usuario LlanoPay', style: theme.textTheme.headlineSmall),
+                Text('Usuario SuperNova', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 4),
                 Text(
                   '+57 ---',
@@ -74,14 +85,14 @@ class ProfileTab extends StatelessWidget {
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () {
-              // TODO: Integrate with AuthService.logout
-              context.go('/login');
+              context.read<AuthBloc>().add(const LogoutRequested());
             },
             icon: const Icon(Icons.logout, color: Colors.red),
             label: const Text('Cerrar Sesion', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
+    ),
     );
   }
 }

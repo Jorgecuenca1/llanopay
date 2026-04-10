@@ -67,7 +67,7 @@ class LlanoPayApp extends StatelessWidget {
           storageService: storageService,
         )..add(const AppStarted()),
         child: MaterialApp.router(
-          title: 'LlanoPay',
+          title: 'SuperNova',
           debugShowCheckedModeBanner: false,
           theme: LlanoPayTheme.lightTheme,
           routerConfig: AppRouter.router,

@@ -5,69 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48383678-7d8a-432b-be05-f32bb63a535a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../.idea/PycharmProjects.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SIFEE/.idea/SIFEE.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../TrabajoMaestria/.idea/TrabajoMaestria.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../TrabajoMaestria/Gdp_Cuenca_Jorge_V2 - John John.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../accesowifi/.idea/accesowifi.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../analisisE14/.idea/analisisE14.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../analisisE24E26/.idea/analisisE24E26.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../analisisregistraduria/.idea/analisisregistraduria.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../andrescomoes/andrescomoes/.idea/andrescomoes.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../andrescomoes/andrespadondees/.idea/andrespadondees.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../auditoriamedica/.idea/auditoriamedica.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio-/.idea/binkio-.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/.idea/binkio.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/.idea/binkio.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/binkio-orquestador.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../binkio/binkio/binkio-orquestador/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../codebit/.idea/codebit.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../constructora/.idea/constructora.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../cuentadecobro/.idea/cuentadecobro.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../cuentasmedicas/.idea/cuentasmedicas.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../dreams_agency/.idea/dreams_agency.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../educart/.idea/educart.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../exoticamaria/.idea/exoticamaria.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../generador_rips/.idea/generador_rips.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../interventoriadeobras/.idea/interventoriadeobras.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../kitturistico/.idea/kitturistico.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/llanopay.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../maquinadeturing/.idea/maquinadeturing.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../millonario/.idea/millonario.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/misfantasias.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../misfantasias/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../mivoto/.idea/mivoto.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../obtenerlugar/.idea/obtenerlugar.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../planillas/.idea/planillas.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../procesarvideo/.idea/procesarvideo.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/pruebadehackeo.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebadehackeo/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../pruebawhatsapp/.idea/pruebawhatsapp.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../reconoce-dispara/.idea/reconoce-dispara.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../recordarapp/.idea/recordarapp.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../secopaso/.idea/secopaso.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../stockmarket/.idea/stockmarket.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../trabajosena/.idea/trabajosena.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../trasladosyadiciones/.idea/trasladosyadiciones.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../vacunacion/.idea/vacunacion.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../vid/.idea/vid.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../vid2text/.idea/vid2text.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../webdigitalmodel/.idea/webdigitalmodel.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ControlElectoral/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ControlElectoral/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../habilitacion/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/../habilitacion/.claude/settings.local.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/settings.local.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/accounts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/accounts/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/accounts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/.metadata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/auth/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/auth/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/auth/register_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/auth/register_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/auth/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/auth/splash_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/home/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/home/dashboard_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/notifications/notifications_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/notifications/notifications_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/profile/profile_tab.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/profile/profile_tab.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_app/lib/screens/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_app/lib/screens/splash_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/llanopay_project/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/llanopay_project/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/platform/app.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/platform/app.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +33,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
@@ -96,6 +54,9 @@
   }
 }</component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\HOME\PycharmProjects\llanopay" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\HOME\PycharmProjects\llanopay" />
     </key>

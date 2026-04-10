@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'LlanoPay',
+                'SuperNova',
                 style: theme.textTheme.displayMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,

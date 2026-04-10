@@ -51,7 +51,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     {
       'id': '5',
       'type': 'system',
-      'title': 'Bienvenido a LlanoPay',
+      'title': 'Bienvenido a SuperNova',
       'message':
           'Tu cuenta ha sido creada exitosamente. Verifica tu identidad para aumentar tus limites.',
       'time': DateTime.now().subtract(const Duration(days: 2)),

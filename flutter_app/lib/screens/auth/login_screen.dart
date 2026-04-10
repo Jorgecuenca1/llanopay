@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'LlanoPay',
+                              'SuperNova',
                               style: theme.textTheme.titleSmall?.copyWith(
                                 color: Colors.white,
                               ),

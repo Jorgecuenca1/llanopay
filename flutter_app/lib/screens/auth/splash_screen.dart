@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'LlanoPay',
+                              'SuperNova',
                               style: GoogleFonts.montserrat(
                                 color: LlanoPayTheme.primaryGreen,
                                 fontSize: 16,
@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 28),
 
                       Text(
-                        'LlanoPay',
+                        'SuperNova',
                         style: GoogleFonts.montserrat(
                           color: Colors.white,
                           fontSize: 36,

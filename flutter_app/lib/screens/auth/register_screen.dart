@@ -89,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Registrate en LlanoPay',
+                'Registrate en SuperNova',
                 style: theme.textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
