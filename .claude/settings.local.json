@@ -54,7 +54,8 @@
       "Bash(export JAVA_HOME=\"/c/Users/HOME/jdk-17.0.2\")",
       "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
       "Bash(/c/Users/HOME/flutter/bin/flutter build:*)",
-      "Bash(/c/Users/HOME/flutter/bin/flutter create:*)"
+      "Bash(/c/Users/HOME/flutter/bin/flutter create:*)",
+      "Bash(find apps:*)"
     ]
   }
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
 
 /// Confirmation screen before executing a transfer.
 class ConfirmTransferScreen extends StatefulWidget {
@@ -16,6 +20,7 @@ class _ConfirmTransferScreenState extends State<ConfirmTransferScreen>
     with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   bool _showSuccess = false;
+  String? _errorMessage;
   late final AnimationController _successAnimController;
   late final Animation<double> _successAnimation;
 
@@ -44,18 +49,146 @@ class _ConfirmTransferScreenState extends State<ConfirmTransferScreen>
     super.dispose();
   }
 
+  String _formatPhone(String raw) {
+    var p = raw.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    if (p.startsWith('57') && !p.startsWith('+')) p = '+$p';
+    if (p.startsWith('3') && p.length == 10) p = '+57$p';
+    if (!p.startsWith('+')) p = '+$p';
+    return p;
+  }
+
   Future<void> _confirm() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final apiService = context.read<ApiService>();
+      final phone = _formatPhone(widget.transferData['phone'] as String);
+      final amount = (widget.transferData['amount'] as num).toDouble();
+      final currency = widget.transferData['currency'] as String? ?? 'COP';
+      final description = widget.transferData['description'] as String? ?? '';
+
+      final response = await apiService.post(
+        ApiConfig.transferSend,
+        data: {
+          'receiver_phone': phone,
+          'amount': amount.toString(),
+          'currency': currency,
+          if (description.isNotEmpty) 'description': description,
+        },
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        final data = response.data as Map<String, dynamic>;
+        final otpRequired = data['otp_required'] == true;
+
+        if (otpRequired) {
+          // Show OTP dialog
+          final transfer = data['transfer'] as Map<String, dynamic>;
+          final transferId = transfer['id'] as String;
+          await _showOTPDialog(apiService, transferId);
+        } else {
+          setState(() {
+            _isLoading = false;
+            _showSuccess = true;
+          });
+          _successAnimController.forward();
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = response.message ??
+              response.errors?.values.first?.toString() ??
+              'Error al realizar la transferencia';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error de conexion: ${e.toString()}';
+      });
+    }
+  }
+
+  Future<void> _showOTPDialog(ApiService apiService, String transferId) async {
+    setState(() => _isLoading = false);
+    final otpController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar con OTP'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Esta transferencia requiere confirmacion con codigo OTP. '
+              'Ingresa el codigo enviado a tu telefono.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: otpController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 24,
+                letterSpacing: 8,
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: const InputDecoration(
+                hintText: '000000',
+                counterText: '',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != true) return;
+
     setState(() => _isLoading = true);
 
-    // TODO: Integrate with TransferService
-    await Future.delayed(const Duration(seconds: 2));
+    final confirmResp = await apiService.post(
+      ApiConfig.transferConfirm,
+      data: {
+        'transfer_id': transferId,
+        'otp_code': otpController.text.trim(),
+      },
+    );
 
     if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-      _showSuccess = true;
-    });
-    _successAnimController.forward();
+
+    if (confirmResp.success) {
+      setState(() {
+        _isLoading = false;
+        _showSuccess = true;
+      });
+      _successAnimController.forward();
+    } else {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = confirmResp.message ?? 'Codigo OTP invalido';
+      });
+    }
   }
 
   @override
@@ -148,6 +281,28 @@ class _ConfirmTransferScreenState extends State<ConfirmTransferScreen>
                 ),
               ),
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 32),
             SizedBox(
               height: 52,

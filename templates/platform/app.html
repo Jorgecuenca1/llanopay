@@ -426,14 +426,25 @@ async function sendTransfer(){
   const btn=document.getElementById('tf-btn');btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
   const data={receiver_phone:fmtPhone(document.getElementById('tf-phone').value),amount:document.getElementById('tf-amount').value,currency:document.getElementById('tf-currency').value,description:document.getElementById('tf-desc').value.trim()};
   const r=await Api.post('/transfers/send/',data);
-  if(r.ok){if(r.data.status==='OTP_REQUIRED'){showOTPModal(r.data.id)}else{toast('Transferencia exitosa!');refreshW();navigate('transfer')}}
-  else{showAlert('tf-alert',r.data.detail||Object.values(r.data).flat().join('. ')||'Error')}
+  if(r.ok){
+    const transfer=r.data.transfer||r.data;
+    const otpRequired=r.data.otp_required||transfer.status==='OTP_REQUIRED';
+    if(otpRequired){
+      showOTPModal(transfer.id);
+    }else{
+      toast('Transferencia exitosa!');
+      await refreshW();
+      navigate('transfer');
+    }
+  }else{
+    showAlert('tf-alert',r.data.detail||Object.values(r.data).flat().join('. ')||'Error');
+  }
   btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane me-2"></i>Enviar Transferencia';
 }
 function showOTPModal(tid){
   document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-h"><h5>Confirmar con OTP</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div><div class="modal-b np-form"><p style="color:var(--np-gray);font-size:.9rem;margin-bottom:16px">Ingresa el codigo OTP enviado a tu telefono para confirmar.</p><div class="form-group"><input type="text" class="form-control text-center" id="tf-otp" maxlength="6" style="font-size:1.3rem;letter-spacing:6px;font-weight:700" placeholder="000000"></div><button class="btn-np w-100" onclick="confirmTf('${tid}')">Confirmar</button></div></div></div>`;
 }
-async function confirmTf(id){const r=await Api.post('/transfers/confirm/',{transfer_id:id,otp_code:document.getElementById('tf-otp').value.trim()});if(r.ok){closeModal();toast('Transferencia confirmada!');refreshW();navigate('transfer')}else{toast('Codigo incorrecto')}}
+async function confirmTf(id){const r=await Api.post('/transfers/confirm/',{transfer_id:id,otp_code:document.getElementById('tf-otp').value.trim()});if(r.ok){closeModal();toast('Transferencia confirmada!');await refreshW();navigate('transfer')}else{toast(r.data.detail||r.data.otp_code?.[0]||'Codigo incorrecto')}}
 function closeModal(){document.getElementById('modal-container').innerHTML=''}
 
 // ===== CRYPTO =====
@@ -459,7 +470,7 @@ async function pgCrypto(c){
 async function loadRates(){const r=await Api.get('/crypto/rates/');const el=document.getElementById('crypto-rates');if(!el)return;const rates=Array.isArray(r.data)?r.data:(r.data?.results||[]);if(rates.length>0){el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Moneda</th><th>Tasa COP</th></tr></thead><tbody>'+rates.map(r=>`<tr><td style="font-weight:600">${r.currency}</td><td>${fmtCOP(r.rate_cop)}</td></tr>`).join('')+'</tbody></table></div>'}else{el.innerHTML='<p style="color:var(--np-gray);font-size:.85rem">Sin tasas disponibles</p>'}}
 async function loadCHist(){const r=await Api.get('/crypto/llanocoin/transactions/',{page_size:15});const el=document.getElementById('crypto-hist');if(!el)return;const txs=r.data?.results||r.data||[];if(txs.length>0){el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Tipo</th><th>Cantidad LLO</th><th>Monto COP</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'+txs.map(t=>`<tr><td><span class="badge-s ${t.transaction_type==='BUY'?'badge-green':'badge-red'}">${t.transaction_type}</span></td><td style="font-weight:600">${fmtLLO(t.amount_llo)}</td><td>${fmtCOP(t.amount_cop)}</td><td>${fmtDate(t.created_at)}</td><td><span class="badge-s badge-green">${t.status}</span></td></tr>`).join('')+'</tbody></table></div>'}else{el.innerHTML='<div class="empty-state"><i class="fas fa-coins"></i><p>Sin transacciones LLO</p></div>'}}
 function setCAction(a){window._cAction=a;document.getElementById('c-buy-btn').className=a==='buy'?'btn-np flex-fill':'btn-np-outline flex-fill';document.getElementById('c-sell-btn').className=a==='sell'?'btn-np flex-fill':'btn-np-outline flex-fill';document.getElementById('c-label').textContent=a==='buy'?'Monto en COP':'Cantidad de LLO';document.getElementById('c-exec').innerHTML=a==='buy'?'<i class="fas fa-coins me-2"></i>Comprar Llanocoin':'<i class="fas fa-coins me-2"></i>Vender Llanocoin'}
-async function execCrypto(){const a=document.getElementById('c-amount').value;const ep=window._cAction==='buy'?'/crypto/llanocoin/buy/':'/crypto/llanocoin/sell/';const d=window._cAction==='buy'?{amount_cop:a}:{amount_llo:a};const r=await Api.post(ep,d);if(r.ok){toast(window._cAction==='buy'?'Compra exitosa!':'Venta exitosa!');refreshW();navigate('crypto')}else{showAlert('crypto-alert',r.data.detail||'Error')}}
+async function execCrypto(){const a=document.getElementById('c-amount').value;const ep=window._cAction==='buy'?'/crypto/llanocoin/buy/':'/crypto/llanocoin/sell/';const d=window._cAction==='buy'?{amount_cop:a}:{amount_llo:a};const r=await Api.post(ep,d);if(r.ok){toast(window._cAction==='buy'?'Compra exitosa!':'Venta exitosa!');await refreshW();navigate('crypto')}else{showAlert('crypto-alert',r.data.detail||'Error')}}
 
 // ===== MARKETPLACE =====
 async function pgMarketplace(c){
@@ -497,7 +508,7 @@ async function pgMerchantDetail(c){
     </div></div></div>
   </div>`;
 }
-async function payMerchant(id){const r=await Api.post('/marketplace/payments/',{merchant:id,amount:document.getElementById('mp-amt').value,currency:document.getElementById('mp-cur').value});if(r.ok){toast('Pago exitoso!');refreshW();navigate('marketplace')}else{showAlert('mp-alert',r.data.detail||'Error al pagar')}}
+async function payMerchant(id){const r=await Api.post('/marketplace/payments/',{merchant:id,amount:document.getElementById('mp-amt').value,currency:document.getElementById('mp-cur').value});if(r.ok){toast('Pago exitoso!');await refreshW();navigate('marketplace')}else{showAlert('mp-alert',r.data.detail||'Error al pagar')}}
 
 // ===== MICROCREDIT =====
 async function pgMicrocredit(c){
