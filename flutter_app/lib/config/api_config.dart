@@ -3,7 +3,7 @@ class ApiConfig {
   ApiConfig._();
 
   /// Base URL for the API. Override via environment or build config.
-  static String baseUrl = 'https://nova.jorgecuenca.com/api/v1';
+  static String baseUrl = 'https://nova.corpofuturo.org/api/v1';
 
   /// WebSocket URL for real-time notifications.
   static String get wsUrl {

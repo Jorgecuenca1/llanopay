@@ -12,7 +12,7 @@ services:
     environment:
       DJANGO_DEBUG: "0"
       SECRET_KEY: "novapay-prod-k3y-s3cur3-2026-xZ9mK4"
-      ALLOWED_HOSTS: "localhost,127.0.0.1,nova.jorgecuenca.com,159.223.164.118"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,nova.corpofuturo.org,nova.jorgecuenca.com,159.223.164.118"
     command: sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput 2>/dev/null; gunicorn llanopay_project.wsgi:application --workers 4 --timeout 120 --bind 0.0.0.0:8005"
 
   https-portal:
@@ -23,7 +23,7 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: 'nova.jorgecuenca.com -> http://backend:8005'
+      DOMAINS: 'nova.corpofuturo.org -> http://backend:8005'
       STAGE: 'production'
       CLIENT_MAX_BODY_SIZE: 100M
       PROXY_READ_TIMEOUT: '600'

@@ -11,9 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='dev-secret-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,nova.jorgecuenca.com,159.223.164.118').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,nova.corpofuturo.org,nova.jorgecuenca.com,159.223.164.118').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://nova.corpofuturo.org',
+    'http://nova.corpofuturo.org',
     'https://nova.jorgecuenca.com',
     'http://nova.jorgecuenca.com',
     'http://159.223.164.118',
