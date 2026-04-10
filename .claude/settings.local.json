@@ -56,7 +56,9 @@
       "Bash(/c/Users/HOME/flutter/bin/flutter build:*)",
       "Bash(/c/Users/HOME/flutter/bin/flutter create:*)",
       "Bash(find apps:*)",
-      "Bash(grep -n \"^}$\\\\|^  }$\\\\|class _CreditScore\" /c/Users/HOME/PycharmProjects/llanopay/flutter_app/lib/screens/microcredit/microcredit_screen.dart)"
+      "Bash(grep -n \"^}$\\\\|^  }$\\\\|class _CreditScore\" /c/Users/HOME/PycharmProjects/llanopay/flutter_app/lib/screens/microcredit/microcredit_screen.dart)",
+      "Bash(grep -l \"TODO\" /c/Users/HOME/PycharmProjects/llanopay/flutter_app/lib/screens/auth/*.dart)",
+      "Bash(/c/Users/HOME/flutter/bin/flutter clean:*)"
     ]
   }
 }

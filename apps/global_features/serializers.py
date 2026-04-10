@@ -3,8 +3,8 @@ from rest_framework import serializers
 
 from apps.global_features.models import (
     Country, Currency, MultiBalance, QRPayment, MobileTopup, BillPayment,
-    ReferralCode, Referral, VirtualCard, RewardPoints, RewardTransaction,
-    WalletTopup,
+    ReferralCode, Referral, VirtualCard, VirtualCardTransaction,
+    RewardPoints, RewardTransaction, WalletTopup,
 )
 
 
@@ -81,16 +81,27 @@ class ReferralSerializer(serializers.ModelSerializer):
 
 class VirtualCardSerializer(serializers.ModelSerializer):
     masked_number = serializers.ReadOnlyField()
+    available_credit = serializers.ReadOnlyField()
     card_holder_name = serializers.CharField(required=False)
     expiry_month = serializers.IntegerField(required=False)
     expiry_year = serializers.IntegerField(required=False)
 
     class Meta:
         model = VirtualCard
-        fields = ['id', 'card_number', 'masked_number', 'card_holder_name',
+        fields = ['id', 'nickname', 'card_number', 'masked_number', 'card_holder_name',
                   'expiry_month', 'expiry_year', 'cvv', 'card_type', 'status',
-                  'currency', 'spending_limit', 'created_at']
-        read_only_fields = ['id', 'card_number', 'cvv', 'status', 'created_at']
+                  'currency', 'balance', 'spending_limit', 'monthly_spent', 'total_spent',
+                  'available_credit', 'created_at']
+        read_only_fields = ['id', 'card_number', 'cvv', 'status', 'balance',
+                             'monthly_spent', 'total_spent', 'available_credit', 'created_at']
+
+
+class VirtualCardTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VirtualCardTransaction
+        fields = ['id', 'transaction_type', 'amount', 'currency', 'merchant_name',
+                  'description', 'status', 'created_at']
+        read_only_fields = ['id', 'status', 'created_at']
 
 
 class RewardPointsSerializer(serializers.ModelSerializer):

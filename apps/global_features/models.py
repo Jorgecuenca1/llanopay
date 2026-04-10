@@ -306,6 +306,7 @@ class VirtualCard(models.Model):
         on_delete=models.CASCADE,
         related_name='virtual_cards',
     )
+    nickname = models.CharField(max_length=50, blank=True, default='Mi Tarjeta')
     card_number = models.CharField(max_length=16, unique=True, default=gen_card_number)
     card_holder_name = models.CharField(max_length=100)
     expiry_month = models.PositiveSmallIntegerField()
@@ -314,7 +315,10 @@ class VirtualCard(models.Model):
     card_type = models.CharField(max_length=20, choices=CardType.choices, default=CardType.VIRTUAL)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
     currency = models.CharField(max_length=3, default='USD')
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0'))
     spending_limit = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('1000'))
+    monthly_spent = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0'))
+    total_spent = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0'))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -326,6 +330,42 @@ class VirtualCard(models.Model):
     @property
     def masked_number(self):
         return f'**** **** **** {self.card_number[-4:]}'
+
+    @property
+    def available_credit(self):
+        return self.spending_limit - self.monthly_spent
+
+
+class VirtualCardTransaction(models.Model):
+    """Transaction made with a virtual card."""
+
+    class TxType(models.TextChoices):
+        PURCHASE = 'PURCHASE', 'Compra'
+        REFUND = 'REFUND', 'Reembolso'
+        TOPUP = 'TOPUP', 'Recarga'
+        FEE = 'FEE', 'Comision'
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pendiente'
+        APPROVED = 'APPROVED', 'Aprobada'
+        DECLINED = 'DECLINED', 'Rechazada'
+        REVERSED = 'REVERSED', 'Reversada'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    card = models.ForeignKey(VirtualCard, on_delete=models.CASCADE, related_name='transactions')
+    transaction_type = models.CharField(max_length=20, choices=TxType.choices, default=TxType.PURCHASE)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    merchant_name = models.CharField(max_length=200, blank=True, default='')
+    description = models.CharField(max_length=200, blank=True, default='')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.APPROVED)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.card.masked_number} - {self.transaction_type} {self.amount}'
 
 
 # ==============================================================

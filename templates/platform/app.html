@@ -681,12 +681,42 @@ async function pgQR(c){
       <div class="sc-label">Ingresa el código QR para realizar un pago</div>
     </div></div>
   </div>
-  <div class="np-card"><div class="card-head"><h6>Mis Pagos QR</h6></div><div class="card-body-c p-0" id="qr-list"><div class="loading-c"><div class="spinner-np"></div></div></div></div>`;
+  <div class="np-card"><div class="card-head"><h6>Mis QR Generados</h6><a href="#" onclick="navigate('qr-create')" style="font-size:.85rem;color:var(--np-primary-light)">+ Nuevo</a></div><div class="card-body-c p-0" id="qr-list"><div class="loading-c"><div class="spinner-np"></div></div></div></div>`;
   const r=await ApiG.get('/qr/list/');const el=document.getElementById('qr-list');
   const list=r.data?.results||r.data||[];
   if(list.length>0){
-    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Código</th><th>Tipo</th><th>Monto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>'+list.map(q=>{const isReceiver=q.receiver===U?.id;return`<tr><td style="font-family:monospace;font-weight:600">${q.code}</td><td><span class="badge-s ${isReceiver?'badge-green':'badge-blue'}">${isReceiver?'Cobro':'Pago'}</span></td><td>${q.amount?fmtCOP(q.amount):'<em>Abierto</em>'}</td><td><span class="badge-s badge-${q.status==='PAID'?'green':q.status==='PENDING'?'yellow':'red'}">${q.status}</span></td><td>${fmtDate(q.created_at)}</td></tr>`}).join('')+'</tbody></table></div>';
-  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-qrcode"></i><p>Sin códigos QR aún</p></div>'}
+    el.innerHTML='<div class="table-responsive"><table class="np-table"><thead><tr><th>Código</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th></th></tr></thead><tbody>'+list.map(q=>{const isReceiver=q.receiver===U?.id;const stColors={PAID:'green',PENDING:'yellow',EXPIRED:'red',CANCELLED:'red'};return`<tr><td style="font-family:monospace;font-weight:600;font-size:.8rem">${q.code}</td><td><span class="badge-s ${isReceiver?'badge-green':'badge-blue'}">${isReceiver?'Cobro':'Pago'}</span></td><td>${q.amount?fmtCOP(q.amount):'<em style="color:var(--np-gray)">Abierto</em>'}</td><td style="font-size:.8rem;color:var(--np-gray)">${q.description||'-'}</td><td><span class="badge-s badge-${stColors[q.status]||'yellow'}">${q.status}</span></td><td style="font-size:.75rem;white-space:nowrap">${fmtDate(q.created_at)}</td><td><button class="btn-np-outline btn-np-sm" onclick="viewQRDetail('${q.code}')"><i class="fas fa-eye"></i></button></td></tr>`}).join('')+'</tbody></table></div>';
+  }else{el.innerHTML='<div class="empty-state"><i class="fas fa-qrcode"></i><p>Sin códigos QR aún</p><button class="btn-np mt-3" onclick="navigate(\\'qr-create\\')">Crear primer QR</button></div>'}
+}
+
+async function viewQRDetail(code){
+  const r=await ApiG.get('/qr/'+code+'/');
+  if(!r.ok){toast('Error al cargar QR');return}
+  const q=r.data;
+  const stColors={PAID:'green',PENDING:'yellow',EXPIRED:'red',CANCELLED:'red'};
+  const stIcons={PAID:'check-circle',PENDING:'clock',EXPIRED:'times-circle',CANCELLED:'ban'};
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-h"><h5>Detalle del QR</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-b">
+    <div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px;margin-bottom:16px">
+      <i class="fas fa-${stIcons[q.status]||'clock'}" style="font-size:3rem;color:var(--np-${stColors[q.status]||'warning'})"></i>
+      <div style="font-weight:700;margin-top:12px;font-size:1.1rem">${q.status}</div>
+      <div style="font-family:monospace;font-size:1.4rem;font-weight:700;margin-top:8px;letter-spacing:2px">${q.code}</div>
+    </div>
+    <div style="background:var(--np-light);padding:16px;border-radius:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--np-gray)">Monto</span><span style="font-weight:700">${q.amount?fmtCOP(q.amount):'Abierto'}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--np-gray)">Moneda</span><span style="font-weight:600">${q.currency}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--np-gray)">Descripcion</span><span style="font-weight:500">${q.description||'-'}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--np-gray)">Creado</span><span>${fmtDate(q.created_at)}</span></div>
+      ${q.expires_at?`<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--np-gray)">Expira</span><span>${fmtDate(q.expires_at)}</span></div>`:''}
+      ${q.paid_at?`<div style="display:flex;justify-content:space-between;color:var(--np-success);margin-top:12px;padding-top:12px;border-top:1px solid var(--np-border)"><span>✓ Pagado</span><span style="font-weight:700">${fmtDate(q.paid_at)}</span></div>`:''}
+      ${q.payer?`<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-top:4px"><span style="color:var(--np-gray)">Pagado por</span><span>Usuario #${q.payer}</span></div>`:''}
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <div style="font-size:.85rem;color:var(--np-gray);margin-bottom:8px">Comparte este código:</div>
+      <button class="btn-np-outline btn-np-sm" onclick="navigator.clipboard.writeText('${q.code}');toast('Código copiado!')"><i class="fas fa-copy me-2"></i>Copiar Código</button>
+    </div>
+  </div></div></div>`;
 }
 
 function pgQRCreate(c){
@@ -849,37 +879,126 @@ async function loadBillHistory(){
 // ===== CARDS =====
 async function pgCards(c){
   c.innerHTML=`
-  <div class="mb-3"><button class="btn-np" onclick="newCard()"><i class="fas fa-plus me-2"></i>Crear Tarjeta Virtual</button></div>
+  <div class="mb-3" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn-np" onclick="showNewCardModal()"><i class="fas fa-plus me-2"></i>Nueva Tarjeta Virtual</button>
+    <span style="color:var(--np-gray);font-size:.85rem">Tarjetas conectadas a tu wallet SuperNova</span>
+  </div>
   <div id="cards-list" class="row g-3"><div class="col-12"><div class="loading-c"><div class="spinner-np"></div></div></div></div>`;
   const r=await ApiG.get('/cards/');const el=document.getElementById('cards-list');
   const list=r.data?.results||r.data||[];
   if(list.length>0){
     el.innerHTML=list.map(card=>`
       <div class="col-md-6 col-lg-4">
-        <div style="background:linear-gradient(135deg,#1a6b21,#388E3C);color:#fff;border-radius:16px;padding:24px;position:relative;overflow:hidden;box-shadow:var(--np-shadow-lg)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <div style="background:linear-gradient(135deg,#1a6b21,#388E3C,#4CAF50);color:#fff;border-radius:16px;padding:24px;position:relative;overflow:hidden;box-shadow:var(--np-shadow-lg);min-height:200px">
+          <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:relative">
             <div style="font-size:1.2rem;font-weight:800">SuperNova</div>
-            <i class="fab fa-cc-visa" style="font-size:2rem;opacity:.9"></i>
+            <i class="fab fa-cc-visa" style="font-size:2.2rem;opacity:.95"></i>
           </div>
-          <div style="font-family:monospace;font-size:1.3rem;letter-spacing:2px;margin-bottom:20px">${card.masked_number}</div>
-          <div style="display:flex;justify-content:space-between;font-size:.75rem">
-            <div><div style="opacity:.7;font-size:.65rem">TITULAR</div><div style="font-weight:600">${card.card_holder_name}</div></div>
-            <div><div style="opacity:.7;font-size:.65rem">EXPIRA</div><div style="font-weight:600">${String(card.expiry_month).padStart(2,'0')}/${String(card.expiry_year).slice(-2)}</div></div>
+          <div style="font-size:.7rem;opacity:.7;margin-bottom:14px">${card.nickname||'Mi Tarjeta'}</div>
+          <div style="font-family:monospace;font-size:1.25rem;letter-spacing:2px;margin-bottom:14px;cursor:pointer" onclick="toggleCardNum('${card.id}','${card.card_number}','${card.masked_number}')" id="num-${card.id}">${card.masked_number}</div>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:8px">
+            <div><div style="opacity:.6">TITULAR</div><div style="font-weight:600">${card.card_holder_name}</div></div>
+            <div><div style="opacity:.6">EXPIRA</div><div style="font-weight:600">${String(card.expiry_month).padStart(2,'0')}/${String(card.expiry_year).slice(-2)}</div></div>
+            <div><div style="opacity:.6">CVV</div><div style="font-weight:600;cursor:pointer" onclick="this.textContent=this.textContent==='***'?'${card.cvv}':'***'">***</div></div>
           </div>
-          <div style="margin-top:12px;display:flex;gap:8px">
+          <div style="display:flex;gap:6px;margin-top:8px">
             <span class="badge-s badge-${card.status==='ACTIVE'?'green':'yellow'}" style="font-size:.65rem">${card.status}</span>
-            <span class="badge-s badge-blue" style="font-size:.65rem">${card.currency}</span>
+            <span class="badge-s" style="background:rgba(255,255,255,.2);color:#fff;font-size:.65rem">${card.currency}</span>
           </div>
         </div>
-        <div class="mt-2 d-flex gap-2">
-          ${card.status==='ACTIVE'?`<button class="btn-np-outline btn-np-sm" onclick="freezeCard('${card.id}')">Congelar</button>`:`<button class="btn-np-outline btn-np-sm" onclick="unfreezeCard('${card.id}')">Activar</button>`}
-          <button class="btn-np-outline btn-np-sm" style="border-color:var(--np-danger);color:var(--np-danger)" onclick="cancelCard('${card.id}')">Cancelar</button>
+        <div style="background:#fff;padding:14px;border-radius:0 0 var(--np-radius) var(--np-radius);border:1px solid var(--np-border);margin-top:-2px">
+          <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:8px">
+            <span style="color:var(--np-gray)">Saldo</span>
+            <span style="font-weight:700">${card.currency} ${parseFloat(card.balance||0).toFixed(2)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:8px">
+            <span style="color:var(--np-gray)">Limite mensual</span>
+            <span style="font-weight:600">${card.currency} ${parseFloat(card.spending_limit||0).toFixed(2)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:12px">
+            <span style="color:var(--np-gray)">Disponible</span>
+            <span style="font-weight:600;color:var(--np-success)">${card.currency} ${parseFloat(card.available_credit||0).toFixed(2)}</span>
+          </div>
+          <div style="background:var(--np-light);border-radius:8px;height:6px;margin-bottom:12px;overflow:hidden">
+            <div style="background:var(--np-primary-light);height:100%;width:${Math.min(100,(parseFloat(card.monthly_spent||0)/parseFloat(card.spending_limit||1))*100)}%"></div>
+          </div>
+          <div class="d-flex gap-1 flex-wrap">
+            <button class="btn-np btn-np-sm" onclick="topupCard('${card.id}')"><i class="fas fa-plus"></i> Recargar</button>
+            <button class="btn-np-outline btn-np-sm" onclick="viewCardTxs('${card.id}','${card.masked_number}')"><i class="fas fa-list"></i> Movim.</button>
+            ${card.status==='ACTIVE'?`<button class="btn-np-outline btn-np-sm" onclick="freezeCard('${card.id}')"><i class="fas fa-snowflake"></i></button>`:`<button class="btn-np-outline btn-np-sm" onclick="unfreezeCard('${card.id}')"><i class="fas fa-play"></i></button>`}
+            <button class="btn-np-outline btn-np-sm" style="border-color:var(--np-danger);color:var(--np-danger)" onclick="cancelCard('${card.id}')"><i class="fas fa-times"></i></button>
+          </div>
         </div>
       </div>
     `).join('');
-  }else{el.innerHTML='<div class="col-12"><div class="empty-state"><i class="far fa-credit-card"></i><p>No tienes tarjetas. Crea tu primera tarjeta virtual!</p></div></div>'}
+  }else{el.innerHTML='<div class="col-12"><div class="empty-state"><i class="far fa-credit-card"></i><p>No tienes tarjetas. Crea tu primera tarjeta virtual!</p><button class="btn-np mt-3" onclick="showNewCardModal()">Crear ahora</button></div></div>'}
 }
-async function newCard(){const r=await ApiG.post('/cards/',{currency:'USD',spending_limit:1000});if(r.ok){toast('Tarjeta creada!');navigate('cards')}else{toast('Error: '+(r.data.detail||''))}}
+function toggleCardNum(id,full,masked){const el=document.getElementById('num-'+id);el.textContent=el.textContent===masked?full.replace(/(\d{4})/g,'$1 ').trim():masked}
+function showNewCardModal(){
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-h"><h5>Nueva Tarjeta Virtual</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-b np-form">
+    <div id="nc-alert" class="alert-np hidden"></div>
+    <div class="form-group"><label class="form-label">Nombre/Apodo</label><input type="text" class="form-control" id="nc-nick" placeholder="Ej: Mi tarjeta principal" value="Mi Tarjeta"></div>
+    <div class="form-group"><label class="form-label">Moneda</label><select class="form-select" id="nc-curr"><option value="USD">USD - Dolares</option><option value="EUR">EUR - Euros</option><option value="COP">COP - Pesos Colombianos</option></select></div>
+    <div class="form-group"><label class="form-label">Limite mensual</label><input type="number" class="form-control" id="nc-limit" value="1000" min="100"></div>
+    <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="nc-type"><option value="VIRTUAL">Virtual</option><option value="PHYSICAL">Fisica (proximamente)</option></select></div>
+    <button class="btn-np w-100" onclick="doCreateCard()"><i class="fas fa-credit-card me-2"></i>Crear Tarjeta</button>
+  </div></div></div>`;
+}
+async function doCreateCard(){
+  const data={
+    nickname:document.getElementById('nc-nick').value,
+    currency:document.getElementById('nc-curr').value,
+    spending_limit:document.getElementById('nc-limit').value,
+    card_type:document.getElementById('nc-type').value,
+  };
+  const r=await ApiG.post('/cards/',data);
+  if(r.ok){closeModal();toast('Tarjeta creada!');navigate('cards')}
+  else{showAlert('nc-alert',r.data.detail||Object.values(r.data).flat().join('. ')||'Error')}
+}
+function topupCard(id){
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-h"><h5>Recargar Tarjeta</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-b np-form">
+    <div id="tc-alert" class="alert-np hidden"></div>
+    <p style="color:var(--np-gray);font-size:.85rem">Transferira saldo desde tu wallet a la tarjeta</p>
+    <div class="form-group"><label class="form-label">Monto a recargar</label><input type="number" class="form-control" id="tc-amount" placeholder="100" min="1"></div>
+    <button class="btn-np w-100" onclick="doTopupCard('${id}')"><i class="fas fa-arrow-up me-2"></i>Recargar</button>
+  </div></div></div>`;
+}
+async function doTopupCard(id){
+  const r=await ApiG.post('/cards/'+id+'/topup/',{amount:document.getElementById('tc-amount').value});
+  if(r.ok){closeModal();toast('Tarjeta recargada!');await refreshW();navigate('cards')}
+  else{showAlert('tc-alert',r.data.detail||'Error')}
+}
+async function viewCardTxs(id,name){
+  const r=await ApiG.get('/cards/'+id+'/transactions/');
+  const txs=r.data||[];
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box" style="max-width:600px"><div class="modal-h"><h5>Movimientos ${name}</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-b">
+    <div class="mb-3"><button class="btn-np-outline btn-np-sm" onclick="simulatePurchase('${id}','${name}')"><i class="fas fa-shopping-cart me-1"></i>Simular compra</button></div>
+    ${txs.length>0?'<div class="table-responsive"><table class="np-table"><thead><tr><th>Tipo</th><th>Comercio</th><th>Monto</th><th>Fecha</th></tr></thead><tbody>'+txs.map(t=>`<tr><td><span class="badge-s badge-${t.transaction_type==='PURCHASE'?'red':'green'}">${t.transaction_type}</span></td><td>${t.merchant_name||'-'}</td><td style="font-weight:600">${t.transaction_type==='PURCHASE'?'-':'+'}${t.currency} ${parseFloat(t.amount).toFixed(2)}</td><td>${fmtDate(t.created_at)}</td></tr>`).join('')+'</tbody></table></div>':'<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin movimientos en esta tarjeta</p></div>'}
+  </div></div></div>`;
+}
+function simulatePurchase(id,name){
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-h"><h5>Simular Compra</h5><button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-b np-form">
+    <div id="sp-alert" class="alert-np hidden"></div>
+    <p style="color:var(--np-gray);font-size:.85rem">Simula una compra con tu tarjeta virtual</p>
+    <div class="form-group"><label class="form-label">Comercio</label><input type="text" class="form-control" id="sp-merchant" placeholder="Amazon, Netflix, etc"></div>
+    <div class="form-group"><label class="form-label">Monto</label><input type="number" class="form-control" id="sp-amount" placeholder="50"></div>
+    <button class="btn-np w-100" onclick="doSimulatePurchase('${id}','${name}')"><i class="fas fa-shopping-cart me-2"></i>Pagar</button>
+  </div></div></div>`;
+}
+async function doSimulatePurchase(id,name){
+  const r=await ApiG.post('/cards/'+id+'/simulate_purchase/',{amount:document.getElementById('sp-amount').value,merchant:document.getElementById('sp-merchant').value});
+  if(r.ok){closeModal();toast('Compra exitosa!');navigate('cards')}
+  else{showAlert('sp-alert',r.data.detail||'Error')}
+}
 async function freezeCard(id){await ApiG.post('/cards/'+id+'/freeze/');toast('Tarjeta congelada');navigate('cards')}
 async function unfreezeCard(id){await ApiG.post('/cards/'+id+'/unfreeze/');toast('Tarjeta activada');navigate('cards')}
 async function cancelCard(id){if(confirm('Cancelar tarjeta permanentemente?')){await ApiG.post('/cards/'+id+'/cancel/');toast('Tarjeta cancelada');navigate('cards')}}

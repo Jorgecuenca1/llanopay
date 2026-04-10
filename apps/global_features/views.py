@@ -12,13 +12,14 @@ from rest_framework.views import APIView
 
 from apps.global_features.models import (
     Country, Currency, MultiBalance, QRPayment, MobileTopup, BillPayment,
-    ReferralCode, Referral, VirtualCard, RewardPoints, RewardTransaction,
-    WalletTopup,
+    ReferralCode, Referral, VirtualCard, VirtualCardTransaction,
+    RewardPoints, RewardTransaction, WalletTopup,
 )
 from apps.global_features.serializers import (
     CountrySerializer, CurrencySerializer, MultiBalanceSerializer,
     QRPaymentSerializer, MobileTopupSerializer, BillPaymentSerializer,
     ReferralCodeSerializer, ReferralSerializer, VirtualCardSerializer,
+    VirtualCardTransactionSerializer,
     RewardPointsSerializer, RewardTransactionSerializer, WalletTopupSerializer,
 )
 from apps.wallet.models import Wallet, Transaction as WalletTx
@@ -468,6 +469,115 @@ class VirtualCardViewSet(viewsets.ModelViewSet):
         card.status = VirtualCard.Status.CANCELLED
         card.save()
         return Response(VirtualCardSerializer(card).data)
+
+    @action(detail=True, methods=['get'])
+    def transactions(self, request, pk=None):
+        """Get transactions for a card."""
+        card = self.get_object()
+        txs = card.transactions.all()
+        return Response(VirtualCardTransactionSerializer(txs, many=True).data)
+
+    @action(detail=True, methods=['post'])
+    def topup(self, request, pk=None):
+        """Top up the card from wallet balance."""
+        card = self.get_object()
+        amount_str = request.data.get('amount', '0')
+        try:
+            amount = Decimal(str(amount_str))
+        except Exception:
+            return Response({'detail': 'Monto invalido'}, status=400)
+        if amount <= 0:
+            return Response({'detail': 'Monto debe ser positivo'}, status=400)
+
+        from django.db import transaction as db_transaction
+        with db_transaction.atomic():
+            wallet, _ = Wallet.objects.select_for_update().get_or_create(user=request.user)
+            # Card always uses USD/COP - convert if needed
+            cop_needed = amount
+            if card.currency == 'USD':
+                # 1 USD = 4100 COP approx
+                try:
+                    usd_curr = Currency.objects.get(code='USD')
+                    cop_needed = (amount * usd_curr.rate_to_usd).quantize(Decimal('0.01'))
+                except Currency.DoesNotExist:
+                    cop_needed = amount * Decimal('4100')
+
+            if wallet.balance_cop < cop_needed:
+                return Response({'detail': f'Saldo COP insuficiente. Necesitas {cop_needed}'}, status=400)
+
+            wallet.balance_cop -= cop_needed
+            wallet.save(update_fields=['balance_cop', 'updated_at'])
+
+            card.balance += amount
+            card.save(update_fields=['balance'])
+
+            # Record card tx
+            VirtualCardTransaction.objects.create(
+                card=card,
+                transaction_type=VirtualCardTransaction.TxType.TOPUP,
+                amount=amount,
+                currency=card.currency,
+                merchant_name='Recarga desde Wallet',
+                description=f'Recarga de {cop_needed} COP',
+            )
+
+            # Record wallet tx
+            WalletTx.objects.create(
+                wallet=wallet,
+                transaction_type=WalletTx.TransactionType.WITHDRAWAL,
+                amount=cop_needed,
+                currency='COP',
+                balance_after=wallet.balance_cop,
+                reference=f'CARD-{card.id}',
+                description=f'Recarga tarjeta {card.masked_number}',
+                status=WalletTx.Status.COMPLETED,
+                metadata={'card_id': str(card.id)},
+            )
+
+        return Response({
+            'message': 'Tarjeta recargada',
+            'card': VirtualCardSerializer(card).data,
+        })
+
+    @action(detail=True, methods=['post'])
+    def simulate_purchase(self, request, pk=None):
+        """Simulate a purchase with the card (for demo)."""
+        card = self.get_object()
+        amount_str = request.data.get('amount', '0')
+        merchant = request.data.get('merchant', 'Comercio')
+        try:
+            amount = Decimal(str(amount_str))
+        except Exception:
+            return Response({'detail': 'Monto invalido'}, status=400)
+
+        if card.status != VirtualCard.Status.ACTIVE:
+            return Response({'detail': 'La tarjeta no esta activa'}, status=400)
+
+        if card.balance < amount:
+            return Response({'detail': 'Saldo insuficiente en la tarjeta'}, status=400)
+
+        if card.monthly_spent + amount > card.spending_limit:
+            return Response({'detail': 'Excede el limite mensual'}, status=400)
+
+        card.balance -= amount
+        card.monthly_spent += amount
+        card.total_spent += amount
+        card.save(update_fields=['balance', 'monthly_spent', 'total_spent'])
+
+        tx = VirtualCardTransaction.objects.create(
+            card=card,
+            transaction_type=VirtualCardTransaction.TxType.PURCHASE,
+            amount=amount,
+            currency=card.currency,
+            merchant_name=merchant,
+            description=f'Compra en {merchant}',
+        )
+
+        return Response({
+            'message': 'Compra exitosa',
+            'transaction': VirtualCardTransactionSerializer(tx).data,
+            'card_balance': str(card.balance),
+        })
 
 
 # ==============================================================
