@@ -100,6 +100,19 @@ class User(AbstractUser):
         default='',
         verbose_name='Departamento',
     )
+    country = models.CharField(
+        max_length=2,
+        blank=True,
+        default='CO',
+        verbose_name='Pais (ISO)',
+        help_text='Codigo ISO 3166-1 alpha-2 (CO, US, MX, etc)',
+    )
+    preferred_currency = models.CharField(
+        max_length=3,
+        blank=True,
+        default='COP',
+        verbose_name='Moneda preferida',
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creacion')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de actualizacion')
 

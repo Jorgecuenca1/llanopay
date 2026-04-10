@@ -16,6 +16,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={'input_type': 'password'},
     )
+    email = serializers.EmailField(required=False, allow_blank=True)
+    country = serializers.CharField(required=False, default='CO', max_length=2)
+    preferred_currency = serializers.CharField(required=False, default='COP', max_length=3)
 
     class Meta:
         model = User
@@ -25,6 +28,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             'document_number',
             'first_name',
             'last_name',
+            'email',
+            'country',
+            'preferred_currency',
             'password',
         ]
 
@@ -51,6 +57,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             document_number=validated_data['document_number'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
+            email=validated_data.get('email', '') or None,
+            country=validated_data.get('country', 'CO'),
+            preferred_currency=validated_data.get('preferred_currency', 'COP'),
         )
         # Create OTP for registration verification
         OTPCode.objects.create(
@@ -161,6 +170,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'date_of_birth',
             'city',
             'department',
+            'country',
+            'preferred_currency',
             'created_at',
             'updated_at',
         ]
