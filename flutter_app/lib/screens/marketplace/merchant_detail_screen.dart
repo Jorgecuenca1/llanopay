@@ -1,61 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
+import '../../config/api_config.dart';
 
-/// Detail screen for a specific marketplace merchant.
-class MerchantDetailScreen extends StatelessWidget {
+/// Detail screen for a specific marketplace merchant - loads real data from API.
+class MerchantDetailScreen extends StatefulWidget {
   final String slug;
 
   const MerchantDetailScreen({super.key, required this.slug});
 
-  // Placeholder merchant data (in real app, fetched from API)
-  Map<String, dynamic> get _merchant => {
-        'name': 'Restaurante El Llanero',
-        'category': 'Restaurantes',
-        'city': 'Villavicencio',
-        'department': 'Meta',
-        'address': 'Cra 30 #25-10, Villavicencio, Meta',
-        'phone': '+57 311 000 0000',
-        'rating': 4.5,
-        'review_count': 23,
-        'accepts_cop': true,
-        'accepts_llo': true,
-        'whatsapp': '+573110000000',
-        'description':
-            'Autentica comida llanera. Mamona, carne a la llanera, y los mejores jugos del llano.',
-        'promotions': [
-          {
-            'title': '10% dcto pagando con LLO',
-            'expires': '2026-04-01',
-          },
-        ],
-        'reviews': [
-          {
-            'user': 'Juan P.',
-            'rating': 5,
-            'comment': 'Excelente mamona, totalmente recomendado!',
-            'date': '2026-02-20',
-          },
-          {
-            'user': 'Maria L.',
-            'rating': 4,
-            'comment': 'Muy buena comida, el servicio puede mejorar.',
-            'date': '2026-02-15',
-          },
-        ],
-      };
+  @override
+  State<MerchantDetailScreen> createState() => _MerchantDetailScreenState();
+}
+
+class _MerchantDetailScreenState extends State<MerchantDetailScreen> {
+  bool _loading = true;
+  Map<String, dynamic>? _merchant;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final api = context.read<ApiService>();
+    final r = await api.get('${ApiConfig.marketplaceMerchants}${widget.slug}/');
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        if (r.success) {
+          _merchant = r.data as Map<String, dynamic>;
+        } else {
+          _error = r.message ?? 'Error al cargar el comercio';
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final merchant = _merchant;
+    if (_loading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Cargando...'),
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_error != null || _merchant == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(_error ?? 'Comercio no encontrado'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final merchant = _merchant!;
     final copFormat = NumberFormat.currency(
       locale: 'es_CO',
       symbol: '\$',
       decimalDigits: 0,
     );
+    final acceptsLlo = merchant['accepts_llo'] == true;
+    final acceptsCop = merchant['accepts_cop'] == true;
+    final cat = merchant['category'] as Map<String, dynamic>?;
+    final rating = (merchant['rating'] as num?)?.toDouble() ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +100,6 @@ class MerchantDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // -- Cover image / logo --
             Container(
               height: 200,
               decoration: BoxDecoration(
@@ -107,7 +137,7 @@ class MerchantDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      merchant['name'] as String,
+                      merchant['business_name']?.toString() ?? '',
                       style: GoogleFonts.montserrat(
                         color: Colors.white,
                         fontSize: 20,
@@ -118,20 +148,17 @@ class MerchantDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // -- Rating & category --
                   Row(
                     children: [
-                      _ratingStars(
-                          (merchant['rating'] as num).toDouble(), context),
+                      _ratingStars(rating, context),
                       const SizedBox(width: 8),
                       Text(
-                        '${merchant['rating']}',
+                        rating.toStringAsFixed(1),
                         style: GoogleFonts.montserrat(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -139,231 +166,74 @@ class MerchantDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '(${merchant['review_count']} resenas)',
+                        '(${merchant['total_sales'] ?? 0} ventas)',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              LlanoPayTheme.primaryGreen.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          merchant['category'] as String,
-                          style: GoogleFonts.nunito(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: LlanoPayTheme.primaryGreen,
+                      if (cat != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: LlanoPayTheme.primaryGreen.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            cat['name']?.toString() ?? '',
+                            style: GoogleFonts.nunito(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: LlanoPayTheme.primaryGreen,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // -- Accepts badges --
                   Row(
                     children: [
                       Text(
                         'Acepta: ',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      if (merchant['accepts_cop'] == true)
-                        _badge('COP', LlanoPayTheme.primaryGreen),
+                      if (acceptsCop) _badge('COP', LlanoPayTheme.primaryGreen),
                       const SizedBox(width: 6),
-                      if (merchant['accepts_llo'] == true)
-                        _badge('LLO', LlanoPayTheme.secondaryGoldDark),
+                      if (acceptsLlo)
+                        _badge('SuperNova Coin', LlanoPayTheme.secondaryGoldDark),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
-                  // -- Info card --
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Informacion',
-                            style:
-                                Theme.of(context).textTheme.titleMedium,
-                          ),
+                          Text('Información',
+                              style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 12),
-                          _infoRow(Icons.location_on_outlined,
-                              merchant['address'] as String),
-                          const SizedBox(height: 10),
-                          _infoRow(Icons.phone_outlined,
-                              merchant['phone'] as String),
-                          const SizedBox(height: 10),
-                          _infoRow(Icons.location_city,
-                              '${merchant['city']}, ${merchant['department']}'),
+                          if (merchant['address'] != null)
+                            _infoRow(Icons.location_on_outlined,
+                                merchant['address'].toString()),
+                          if (merchant['city'] != null) ...[
+                            const SizedBox(height: 10),
+                            _infoRow(Icons.location_city,
+                                '${merchant['city']}, ${merchant['department'] ?? ''}'),
+                          ],
                         ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // -- Description --
-                  if ((merchant['description'] as String).isNotEmpty) ...[
-                    Text(
-                      merchant['description'] as String,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // -- Active promotions --
-                  if ((merchant['promotions'] as List).isNotEmpty) ...[
-                    Text(
-                      'Promociones activas',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    ...(merchant['promotions'] as List).map((promo) {
-                      return Card(
-                        color: LlanoPayTheme.secondaryGold.withOpacity(0.1),
-                        child: ListTile(
-                          leading: const Icon(
-                            Icons.local_offer,
-                            color: LlanoPayTheme.secondaryGoldDark,
-                          ),
-                          title: Text(
-                            promo['title'] as String,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: LlanoPayTheme.secondaryGoldDark,
-                                ),
-                          ),
-                          subtitle: Text(
-                            'Valido hasta ${promo['expires']}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // -- Reviews section --
-                  Text(
-                    'Resenas',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  ...(merchant['reviews'] as List).map((review) {
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: LlanoPayTheme.primaryGreen
-                                      .withOpacity(0.1),
-                                  child: Text(
-                                    (review['user'] as String)
-                                        .substring(0, 1),
-                                    style: GoogleFonts.montserrat(
-                                      color: LlanoPayTheme.primaryGreen,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        review['user'] as String,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
-                                      ),
-                                      Text(
-                                        review['date'] as String,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                _ratingStars(
-                                    (review['rating'] as num).toDouble(),
-                                    context),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              review['comment'] as String,
-                              style:
-                                  Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-
                   const SizedBox(height: 24),
-
-                  // -- Action buttons --
                   SizedBox(
                     height: 52,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        _showPayDialog(context, copFormat);
-                      },
+                      onPressed: () =>
+                          _showPayDialog(context, merchant, acceptsLlo, acceptsCop),
                       icon: const Icon(Icons.payment),
-                      label: const Text('Pagar'),
+                      label: const Text('Pagar a este comercio'),
                     ),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  // -- WhatsApp button --
-                  SizedBox(
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Launch WhatsApp URL
-                        final whatsapp = merchant['whatsapp'] as String;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Abriendo WhatsApp: $whatsapp'),
-                            backgroundColor: LlanoPayTheme.success,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.chat, color: Color(0xFF25D366)),
-                      label: const Text(
-                        'WhatsApp',
-                        style: TextStyle(color: Color(0xFF25D366)),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF25D366)),
-                      ),
-                    ),
-                  ),
-
                   const SizedBox(height: 24),
                 ],
               ),
@@ -374,47 +244,87 @@ class MerchantDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showPayDialog(BuildContext context, NumberFormat copFormat) {
+  void _showPayDialog(BuildContext context, Map<String, dynamic> merchant,
+      bool acceptsLlo, bool acceptsCop) {
     final amountController = TextEditingController();
+    String currency = acceptsCop ? 'COP' : 'LLO';
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Pagar al comercio'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Monto',
-                prefixText: '\$ ',
-                suffixText: 'COP',
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSt) => AlertDialog(
+          title: Text('Pagar a ${merchant['business_name']}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Monto',
+                  prefixText: '\$ ',
+                ),
               ),
+              const SizedBox(height: 12),
+              if (acceptsCop && acceptsLlo)
+                DropdownButtonFormField<String>(
+                  value: currency,
+                  decoration: const InputDecoration(labelText: 'Moneda'),
+                  items: [
+                    if (acceptsCop)
+                      const DropdownMenuItem(value: 'COP', child: Text('COP - Pesos')),
+                    if (acceptsLlo)
+                      const DropdownMenuItem(
+                          value: 'LLO', child: Text('LLO - SuperNova Coin')),
+                  ],
+                  onChanged: (v) => setSt(() => currency = v ?? 'COP'),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount = amountController.text.trim();
+                if (amount.isEmpty) return;
+                Navigator.pop(ctx);
+                await _payMerchant(merchant['id']?.toString() ?? '', amount, currency);
+              },
+              child: const Text('Pagar'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pago procesado exitosamente'),
-                  backgroundColor: LlanoPayTheme.success,
-                ),
-              );
-            },
-            child: const Text('Pagar'),
-          ),
-        ],
       ),
     );
+  }
+
+  Future<void> _payMerchant(String merchantId, String amount, String currency) async {
+    final api = context.read<ApiService>();
+    final r = await api.post('/marketplace/payments/', data: {
+      'merchant': merchantId,
+      'amount': amount,
+      'currency': currency,
+    });
+    if (!mounted) return;
+    if (r.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pago exitoso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(r.message ?? 'Error al pagar'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _badge(String label, Color color) {

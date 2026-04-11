@@ -329,7 +329,7 @@ class _MicrocreditRequestScreenState extends State<MicrocreditRequestScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Colateral en Llanocoin requerido',
+                          'Colateral en SuperNova Coin requerido',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium

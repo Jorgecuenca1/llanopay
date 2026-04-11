@@ -247,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${_lloFormat.format(lloBalance)} Llanocoin',
+                        '${_lloFormat.format(lloBalance)} SuperNova Coin',
                         style: GoogleFonts.nunito(
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 16,
@@ -287,7 +287,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       {
         'icon': Icons.toll,
-        'label': 'Llanocoin',
+        'label': 'SuperNova Coin',
         'color': LlanoPayTheme.accentBrown,
         'onTap': () => context.push('/crypto/llanocoin'),
       },
@@ -335,7 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'color': LlanoPayTheme.primaryGreen,
       },
       {
-        'title': 'Gana Llanocoin',
+        'title': 'Gana SuperNova Coin',
         'subtitle': 'Recibe 5 LLO por cada referido',
         'color': LlanoPayTheme.secondaryGoldDark,
       },

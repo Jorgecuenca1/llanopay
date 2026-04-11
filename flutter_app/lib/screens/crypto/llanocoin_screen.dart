@@ -8,7 +8,7 @@ import '../../config/theme.dart';
 import '../../services/api_service.dart';
 import '../../config/api_config.dart';
 
-/// Llanocoin (LLO) management screen: buy, sell, view balance and history.
+/// SuperNova Coin (LLO) management screen: buy, sell, view balance and history.
 class LlanocoinScreen extends StatefulWidget {
   const LlanocoinScreen({super.key});
 
@@ -133,7 +133,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Llanocoin'),
+        title: const Text('SuperNova Coin'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -197,7 +197,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '${_currentLloBalance.toStringAsFixed(2)} LLO',
+                      '${_currentLloBalance.toStringAsFixed(2)} SNC',
                       style: GoogleFonts.montserrat(
                         color: Colors.white,
                         fontSize: 26,
@@ -217,7 +217,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '1 LLO = ${_copFormat.format(_exchangeRate)} COP',
+                    '1 SNC = ${_copFormat.format(_exchangeRate)} COP',
                     style: GoogleFonts.nunito(
                       color: Colors.white,
                       fontSize: 14,
@@ -252,12 +252,12 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Comprar Llanocoin',
+            'Comprar SuperNova Coin',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Usa pesos colombianos para comprar LLO',
+            'Usa pesos colombianos para comprar SNC',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: LlanoPayTheme.textSecondary,
                 ),
@@ -306,7 +306,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_buyPreviewLlo.toStringAsFixed(2)} LLO',
+                  '${_buyPreviewLlo.toStringAsFixed(2)} SNC',
                   style: GoogleFonts.montserrat(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -325,7 +325,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
               icon: _processing
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.shopping_cart),
-              label: Text(_processing ? 'Procesando...' : 'Comprar LLO'),
+              label: Text(_processing ? 'Procesando...' : 'Comprar SNC'),
             ),
           ),
         ],
@@ -340,19 +340,19 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Vender Llanocoin',
+            'Vender SuperNova Coin',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Convierte tus LLO a pesos colombianos',
+            'Convierte tus SNC a pesos colombianos',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: LlanoPayTheme.textSecondary,
                 ),
           ),
           const SizedBox(height: 24),
 
-          // Amount in LLO
+          // Amount in SNC
           TextFormField(
             controller: _sellAmountController,
             keyboardType: TextInputType.number,
@@ -362,9 +362,9 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
             ),
             textAlign: TextAlign.center,
             decoration: const InputDecoration(
-              labelText: 'Cantidad de LLO',
+              labelText: 'Cantidad de SNC',
               hintText: '0.00',
-              suffixText: 'LLO',
+              suffixText: 'SNC',
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -415,7 +415,7 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
               icon: _processing
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.sell_outlined),
-              label: Text(_processing ? 'Procesando...' : 'Vender LLO'),
+              label: Text(_processing ? 'Procesando...' : 'Vender SNC'),
             ),
           ),
         ],
@@ -435,14 +435,14 @@ class _LlanocoinScreenState extends State<LlanocoinScreen>
           ),
           const SizedBox(height: 12),
           Text(
-            'Sin transacciones de Llanocoin',
+            'Sin transacciones de SuperNova Coin',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: LlanoPayTheme.textSecondary,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Tus compras y ventas de LLO apareceran aqui',
+            'Tus compras y ventas de SNC apareceran aqui',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

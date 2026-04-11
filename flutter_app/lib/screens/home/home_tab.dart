@@ -177,8 +177,8 @@ class _HomeTabState extends State<HomeTab> {
                                 const SizedBox(width: 8),
                                 Text(
                                   _balanceVisible
-                                      ? '${_formatCOP(_wallet?['balance_llo'])} SuperNova Coin'
-                                      : '****** SuperNova Coin',
+                                      ? '${_formatCOP(_wallet?['balance_llo'])} SNC'
+                                      : '****** SNC',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                       color: const Color(0xFFF9A825), fontWeight: FontWeight.w600),
                                 ),
